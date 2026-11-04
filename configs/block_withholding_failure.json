@@ -1,0 +1,49 @@
+{
+  "scenario": "block_withholding_failure",
+  "seed": 42,
+  "duration_ticks": 100000,
+  "max_events": 10000,
+  "max_blocks": 100,
+  "max_pending_events": 10000,
+  "difficulty": 2,
+  "mining_attempts": 1000000,
+  "mean_block_ticks": 200,
+  "nodes": [
+    {
+      "id": "alice",
+      "hash_power": 0
+    },
+    {
+      "id": "bob",
+      "hash_power": 60
+    },
+    {
+      "id": "observer",
+      "hash_power": 0
+    }
+  ],
+  "links": [
+    {
+      "from": "alice",
+      "to": "bob",
+      "latency_ticks": 5,
+      "jitter_ticks": 2
+    },
+    {
+      "from": "bob",
+      "to": "observer",
+      "latency_ticks": 5,
+      "jitter_ticks": 2
+    }
+  ],
+  "attack": {
+    "type": "withholding",
+    "adversary": 0,
+    "target": 1,
+    "confirmations": 2,
+    "pool_members": [
+      0,
+      1
+    ]
+  }
+}

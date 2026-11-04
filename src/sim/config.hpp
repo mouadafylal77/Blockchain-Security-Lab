@@ -1,11 +1,15 @@
 #pragma once
 #include "sim/event.hpp"
+#include "attacks/attack.hpp"
+#include "detection/detector.hpp"
 #include <vector>
 #include <string>
 namespace bsl::sim {
-struct NodeConfig { std::string id; double hash_power = 0; };
+struct NodeConfig { std::string id; double hash_power = 0; std::string peer_group; };
 struct LinkConfig { std::size_t from = 0, to = 0; Time latency = 0, jitter = 0; };
 struct Config {
+    attacks::Config attack;
+    detection::Config security;
     std::string scenario = "baseline";
     std::uint64_t seed = 42;
     Time duration_ticks = 1000;

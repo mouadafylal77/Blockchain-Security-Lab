@@ -1,0 +1,45 @@
+{
+  "scenario": "attack_51_failure",
+  "seed": 42,
+  "duration_ticks": 100000,
+  "max_events": 10000,
+  "max_blocks": 100,
+  "max_pending_events": 10000,
+  "difficulty": 1,
+  "mining_attempts": 1000000,
+  "mean_block_ticks": 20,
+  "nodes": [
+    {
+      "id": "alice",
+      "hash_power": 85
+    },
+    {
+      "id": "bob",
+      "hash_power": 15
+    },
+    {
+      "id": "observer",
+      "hash_power": 0
+    }
+  ],
+  "links": [
+    {
+      "from": "alice",
+      "to": "bob",
+      "latency_ticks": 5,
+      "jitter_ticks": 2
+    },
+    {
+      "from": "bob",
+      "to": "observer",
+      "latency_ticks": 5,
+      "jitter_ticks": 2
+    }
+  ],
+  "attack": {
+    "type": "51",
+    "adversary": 0,
+    "target": 1,
+    "confirmations": 10000
+  }
+}

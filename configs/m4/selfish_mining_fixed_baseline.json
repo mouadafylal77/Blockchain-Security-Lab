@@ -1,0 +1,57 @@
+{
+  "scenario": "selfish_mining_fixed_baseline",
+  "seed": 42,
+  "duration_ticks": 100000,
+  "max_events": 100000,
+  "max_blocks": 100,
+  "max_pending_events": 100000,
+  "difficulty": 1,
+  "mining_attempts": 1000000,
+  "mean_block_ticks": 20,
+  "nodes": [
+    {
+      "id": "alice",
+      "hash_power": 40
+    },
+    {
+      "id": "bob",
+      "hash_power": 60
+    },
+    {
+      "id": "observer",
+      "hash_power": 0
+    }
+  ],
+  "links": [
+    {
+      "from": "alice",
+      "to": "bob",
+      "latency_ticks": 5,
+      "jitter_ticks": 2
+    },
+    {
+      "from": "bob",
+      "to": "observer",
+      "latency_ticks": 5,
+      "jitter_ticks": 2
+    }
+  ],
+  "attack": {
+    "type": "selfish",
+    "adversary": 0,
+    "target": 1,
+    "confirmations": 2,
+    "enabled": false
+  },
+  "security": {
+    "mode": "baseline",
+    "detector": "fixed",
+    "window_ticks": 2000,
+    "audit_ticks": 100,
+    "mitigate_confirmations": false,
+    "mitigate_publication": true,
+    "mitigate_pool": false,
+    "mitigate_peers": false,
+    "publication_delay": 100
+  }
+}

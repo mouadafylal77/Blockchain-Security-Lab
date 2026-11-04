@@ -2,6 +2,9 @@
 #include "sim/event_queue.hpp"
 #include "sim/network.hpp"
 #include "sim/node.hpp"
+#include "sim/mining_pool.hpp"
+#include "detection/feature_extractor.hpp"
+#include "mitigation/policy.hpp"
 
 namespace bsl::sim {
 struct ProducedBlock { Block block; std::size_t miner; Time discovered; };
@@ -28,8 +31,32 @@ public:
     const std::string& stop_reason() const { return stop_reason_; }
     Time now() const { return queue_.now(); }
     std::size_t pending_events() const { return queue_.size(); }
+    void publish(std::size_t origin, const std::string& hash) {
+        trace_.push_back({now(), origin, "publication", hash, {}, {}, 0});
+        receive(origin, hash, true);
+    }
+    const attacks::Attack& attack() const { return attack_; }
+    const MiningPool& pool() const { return pool_; }
+    const detection::Detector& detector() const { return detector_; }
+    const mitigation::Policy& defenses() const { return defenses_; }
+    const Network& network() const { return network_; }
+    unsigned required_confirmations(std::size_t node,unsigned base) const { return defenses_.confirmations(node,base,now()); }
+    bool payment_allowed(std::size_t node) { ++defenses_.payment_checks; const bool ok=defenses_.payment_allowed(node,now()); if(!ok)++defenses_.payment_deferrals; return ok; }
+    std::uint64_t security_audits=0, peak_observation_samples=0;
+    std::uint64_t deferred_messages=0, deferred_ticks=0;
+    std::uint64_t reconnections=0, sync_messages=0;
 private:
     Config config_;
+    detection::Detector detector_;
+    detection::FeatureExtractor observations_;
+    mitigation::Policy defenses_;
+    std::vector<Time> last_arrival_;
+    std::vector<std::set<std::string>> observed_payloads_;
+    std::vector<std::set<std::size_t>> observed_peers_;
+    Time last_audit_=0;
+    attacks::Attack attack_;
+    MiningPool pool_;
+    Rng pool_rng_;
     Rng mining_rng_;
     Network network_;
     EventQueue queue_;
@@ -41,6 +68,10 @@ private:
     std::string stop_reason_;
     bool started_ = false;
     void schedule_mining(std::size_t miner);
+    void schedule_share(std::size_t miner);
+    void security_audit(bool operational = true);
+    void observe_arrival(const Event& event);
+    void diversify(std::size_t node);
     void discover(std::size_t miner);
     void receive(std::size_t node, const std::string& hash, bool local);
     void broadcast(std::size_t node, const std::string& hash);

@@ -324,3 +324,297 @@ du protocole scientifique. La portée PoS reste à clarifier contre l'énoncé.
 M3, pools, paiements, récompenses, détecteurs, mitigations, analyse Python et web
 n'ont pas été implémentés. Prochaine étape : revue/validation de M2, puis définition
 du scénario 51 % et de ses règles de paiement/confirmations en M3.
+
+## 2026-11-04 — M3 : quatre attaques, intégration séquentielle
+
+Sources relues : instructions, plan, énoncé officiel, modèle, journal et moteur M2.
+Aucune contradiction bloquante : M3 impose quatre comportements distincts,
+contrôles honnêtes, assertions d'objectifs et exports bruts. La portée PoS reste
+ambiguë dans l'énoncé ; ce travail concerne exclusivement les attaques PoW/P2P.
+Le M4 complet (détecteurs, mitigations, évaluation statistique) n'est pas introduit.
+
+### Vérifications réelles, dans l'ordre demandé
+
+Toutes les étapes ont lancé `./scripts/test-ucrt64.ps1`, avec GCC/OpenSSL UCRT64,
+CMake/Ninja/CTest existants et `--parallel 2`. Presets et script inchangés.
+
+| Étape | Résultat CTest exécuté | Durée réelle |
+|---|---|---:|
+| Avant toute modification M3 | 31/31 réussis | 1,34 s |
+| Chaîne privée / double dépense | 32/32 réussis | 2,62 s |
+| Selfish mining | 33/33 réussis | 2,35 s |
+| Pool / block withholding | 34/34 réussis | 2,62 s |
+| Sybil | 35/35 réussis | 2,36 s |
+| Exports/contrôles/fichiers d'échec | 35/35 réussis | 2,27 s |
+| Vérification finale renforcée | 35/35 réussis | 2,63 s |
+
+Aucun échec de compilation/CTest constaté. Deux avertissements à l'étape selfish
+(parenthèses et variable inutilisée) ont été corrigés à l'étape suivante ; aucun
+avertissement de compilation dans le dernier journal. La démo M1 est restée valide
+à chaque étape, avec les mêmes hashes/nonces. Journaux locaux :
+`build/m3_selfish.log`, `build/m3_withholding.log`, `build/m3_sybil.log`,
+`build/m3_final.log` (ignorés par Git).
+
+Le script exécute exactement les commandes suivantes avec les outils Visual
+Studio BuildTools trouvés lors de M1/M2, GCC restant celui de MSYS2 UCRT64 :
+
+```powershell
+cmake --preset ucrt64 "-DCMAKE_MAKE_PROGRAM=C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe"
+cmake --build --preset ucrt64 --parallel 2
+ctest --preset ucrt64 --output-on-failure
+./build/ucrt64/blockchain_sim.exe --demo
+```
+
+### Fichiers créés et modifiés
+
+Créés : `src/attacks/attack.hpp`, `config.cpp`, `attack_51.cpp`,
+`selfish_mining.cpp`, `block_withholding.cpp`, `sybil.cpp`, `results.cpp` ;
+`src/sim/mining_pool.hpp` ; `tests/test_attacks.cpp` ; douze configurations :
+`attack_51`, `selfish_mining`, `block_withholding`, `sybil`, chacune en `.json`,
+`_control.json`, `_failure.json` dans `configs/`.
+
+Modifiés : `CMakeLists.txt` (version 0.3.0, sources/tests), `src/sim/config.hpp`,
+`config.cpp` (objet attack optionnel validé), `event.hpp` (shares), `simulator.hpp`,
+`simulator.cpp` (points de publication/rétention, pool, réseau effectif),
+`src/metrics/json_exporter.cpp` (résultats spécifiques), README et les deux
+fichiers de documentation. Pas de modification du noyau, de main.cpp, des tests
+M1/M2, des presets ou du script PowerShell. Pas de dépendance supplémentaire.
+
+### Assertions comportementales
+
+Quatre nouveaux cas CTest contiennent chacun plusieurs exécutions et assertions :
+
+- `attack_51` : paiement accepté puis absent de la branche finale, dépense
+  concurrente présente, publication et réorganisation ; échec à puissance zéro
+  et confirmations impossibles malgré des blocs privés.
+- `selfish_mining` : avance privée et publication effectives, part active supérieure
+  au poids de hash dans le scénario favorable ; absence de gain/publication à
+  puissance zéro ; contrôle honnête sans rétention.
+- `block_withholding` : shares plus nombreuses que solutions complètes retenues,
+  perte de récompenses canoniques par rapport au contrôle apparié, pas de
+  rétention dans ce contrôle ; fichier d'échec à puissance adverse nulle.
+- `sybil` : messages filtrés, victime isolée ; échec avec chemin honnête conservé,
+  mêmes temps de découverte et même nombre de blocs ; identités de poids positif
+  rejetées.
+
+Chaque cas vérifie aussi la reproduction exacte du JSON, le rejet d'un participant
+hors limites et son fichier de scénario d'échec. Les 31 tests M2 demeurent inchangés.
+
+### Exécutions CLI observées
+
+Les douze configurations ont été exécutées réellement, code de sortie 0, avec :
+
+```powershell
+# Pour chaque NAME parmi attack_51, selfish_mining, block_withholding, sybil,
+# puis NAME_control et NAME_failure :
+./build/ucrt64/blockchain_sim.exe --config configs/NAME.json --output results/raw/m3/NAME
+```
+
+| Scénario seed 42 | Résultat observé |
+|---|---|
+| 51 % favorable | paiement confirmé renversé ; 3 blocs privés publiés ; success=true |
+| 51 % échec | 84 blocs privés, aucune publication faute de confirmations ; success=false |
+| Selfish favorable | 52 retenus, 50 publiés ; part active 37/67 = 55,22 % pour 40 % de hash |
+| Selfish contrôle | aucune rétention ; part active 48,84 % sur cette seed |
+| Selfish échec | puissance adverse nulle ; success=false |
+| Withholding favorable | 52 solutions complètes retenues ; récompense pool 48 unités |
+| Withholding contrôle | aucune rétention ; récompense pool 99 unités |
+| Withholding échec | poids adverse nul ; aucune solution retenue ; pool 100 unités |
+| Sybil favorable | 40 messages filtrés ; victime au genesis ; success=true |
+| Sybil échec | 40 filtrages mais chemin honnête ; victime reçoit les blocs ; success=false |
+
+Tous les contrôles ont success=false. Les unités de pool valent un bloc actif
+unitaire dans la vue cible ; ce ne sont pas des monnaies réelles. Les exemples
+ne démontrent pas un gain moyen ou une probabilité d'attaque. Les shares et payouts
+sont exportés dans `attack.pool`, la topologie effective dans `attack.effective_links`.
+Les traces incluent rétention et publication, en plus des réorganisations M2.
+
+### Limites et décisions scientifiques
+
+Le modèle détaille les choix : jeton unique sans portefeuille/signature/UTXO
+générique ; connaissance idéale des confirmations du marchand ; stratégie selfish
+simplifiée publiant toute l'avance face à la concurrence (pas Eyal–Sirer complet) ;
+shares probabilistes sans calcul de hash bas seuil ; pool sans serveur de jobs,
+payout prorata sur le run ; capture des connexions Sybil supposée au démarrage,
+victime passive. Une seule attaque par run. Pas d'hypothèse que les défenses
+fonctionnent : aucune défense M4 implémentée.
+
+Ces choix sont exécutables et testés mais restent à valider comme protocole
+scientifique avant des campagnes : biais du départage lexicographique, résolution
+des ticks, topologie, oracle marchand, stratégie selfish et politique de pool.
+Les résultats sont censurés par les limites configurées ; les branches privées
+restantes ne sont pas publiées artificiellement à la fin.
+
+`exo4.cpp` conserve le SHA-256
+`DD167B553F5CFB36D0FA0DCD711E2F6B79B915B4434CBAC3D37EEAA6EC76EAD2`.
+Aucun commit, mise en index ou push effectué. Prochaine étape : revue de M3 et des
+hypothèses avant M4, sans démarrage de M4 dans cette tâche.
+
+## 2026-11-04 — M4 : détection statistique adaptative et mitigations
+
+Décision du propriétaire appliquée : aucun Machine Learning. Sources relues :
+AGENTS, PLAN, projet, modèle, historique, core/sim/attacks/metrics/tests.
+Les quatre contre-mesures et les détecteurs fixe puis adaptatif suivent M4.
+Dépendances minimales ajoutées : registre public de soumissions par participant,
+observations par voisin, groupes administratifs de pairs, reconnexion et rattrapage
+local. Aucune connaissance des blocs privés n'est fournie aux détecteurs.
+L'état initial contenait les modifications M3 non commitées ; elles sont conservées.
+
+### Étapes et exécutions réelles
+
+Toutes les constructions passent par le script existant `./scripts/test-ucrt64.ps1`,
+avec CMake/Ninja, GCC et OpenSSL UCRT64, compilation limitée à **deux tâches**.
+
+| Étape | Résultat réellement exécuté | Durée CTest |
+|---|---|---:|
+| Avant toute modification M4 | 35/35 réussis | 2,00 s |
+| Fenêtres, fixe et confusion | 36/36 réussis | 2,63 s |
+| EWMA et seuils adaptatifs | 36/36 réussis | 2,46 s |
+| Observations publiques et raccordement | 36/36 réussis | 1,69 s |
+| Politique de confirmations, pureté, référence externe | 39/39 réussis | 2,26 s |
+| Probation des messages tardifs | 40/40 réussis | 2,12 s |
+| Premier audit de pool | 40/41 réussis, security_pool en échec | 2,21 s |
+| Audit avec fenêtre suffisante et test explicite du cas manqué | 41/41 réussis | 2,28 s |
+| Reconnexion et rattrapage Sybil | 42/42 réussis | 2,29 s |
+| Modes de comparaison et paramètres invalides | 43/43 réussis | 2,97 s |
+| Ensemble des exemples contrôlés et reproductibilité | 44/44 réussis | 4,90 s |
+| Bornes numériques et contrôles finaux | 44/44 réussis | 3,97 s |
+
+L'échec de pool n'a pas été masqué : la fenêtre de 2000 ticks ne produisait pas
+assez de shares pour dépasser le seuil 3. Ce cas est désormais un test d'attaque
+active **non détectée**. La fenêtre de 10000 ticks, sans abaisser le seuil, permet
+l'audit opérationnel et est déclarée dans les exemples pool. Les conditions de
+puissance, les limites et la seed restent explicites.
+Un avertissement de copie de paire dans la reconnexion a été corrigé ; aucun
+avertissement de compilation dans le dernier journal complet.
+
+Commandes réellement lancées par le script, avec les chemins d'outils M1/M2 :
+
+```powershell
+cmake --preset ucrt64 "-DCMAKE_MAKE_PROGRAM=C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe"
+cmake --build --preset ucrt64 --parallel 2
+ctest --preset ucrt64 --output-on-failure
+./build/ucrt64/blockchain_sim.exe --demo
+```
+
+Les **35 tests M1–M3** demeurent exécutés. Neuf cas CTest nouveaux :
+`detection_statistics`, `security_confirmations`, `security_publication`,
+`security_pool`, `security_peers`, `security_purity`, `security_calibration`,
+`security_configuration`, `security_controlled_examples`. Chaque cas contient
+plusieurs assertions et exécutions. Le test d'ensemble génère sa propre référence
+dans build/, sans dépendre d'artefacts préexistants dans results/.
+
+Vérifications : fenêtre (t-W,t], Welford, variance/EWMA exactes, seuil calculé
+avant mise à jour, plancher de dispersion, calibration absente/insuffisante,
+contamination lente, confusion TP/FP/TN/FN/F1, observations identiques avec labels
+baseline/attacked/protected donnant les mêmes décisions, scénarios honnêtes
+calmes sans alerte pour les deux détecteurs, FP conservés sur les honnêtes bruités,
+FN réel avec fenêtre pool courte, effets sur acceptations/messages/crédits/réception,
+mode sans défense non opérationnel, paramètres invalides et JSON reproductible.
+
+### Fichiers de cette tâche
+
+Créés (45 fichiers, dont 28 configurations) :
+
+```text
+src/detection/detector.hpp / detector.cpp
+src/detection/feature_extractor.hpp / feature_extractor.cpp
+src/detection/config_io.hpp / config_io.cpp
+src/mitigation/policy.hpp / policy.cpp
+src/metrics/detection_evaluation.hpp / detection_evaluation.cpp
+src/metrics/security_export.hpp / security_export.cpp
+src/sim/security.cpp
+tests/test_detection.cpp
+tests/test_security.cpp
+tests/test_security_experiments.cpp
+scripts/run-m4-examples.ps1
+configs/m4/<famille>_calibration.json                                  (4)
+configs/m4/<famille>_<fixed|adaptive>_<baseline|attacked|protected>.json  (24)
+```
+
+Familles de noms : attack_51, selfish_mining, block_withholding, sybil.
+Modifiés : CMakeLists (version 0.4.0), README, SIMULATION_MODEL et ce journal ;
+sim/config.hpp et .cpp, simulator.hpp et .cpp, network.hpp et .cpp, event.hpp,
+mining_pool.hpp ; attacks/attack.hpp, attack_51.cpp, results.cpp ;
+metrics/json_exporter.cpp. Pas de dépendance supplémentaire.
+Core, main.cpp, exo4.cpp, tests existants, presets et script de construction
+préservés. Les modifications des sources M3 sont limitées à l'acceptation
+marchande et aux registres/exports nécessaires à M4.
+
+### Comparaisons exécutées
+
+`./scripts/run-m4-examples.ps1` a été exécuté réellement. Il lance quatre
+calibrations honnêtes seed 7, puis 24 runs évalués seed 42 (4 familles x 2
+algorithmes x 3 modes). Tous retournent 0. Les JSON bruts et la synthèse sont
+locaux dans `results/raw/m4/`, ignorés par Git. Les baselines évaluées chargent
+la référence antérieure : elles ne sont pas artificiellement exemptées d'alertes.
+
+Résultats des exemples attaqués, unité (run, famille principale) :
+
+| Attaque | Fixe : TP/FP/FN, latence | Adaptatif : TP/FP/FN, latence |
+|---|---|---|
+| 51 % | 1/1/0, 100 ticks | 1/1/0, 100 ticks |
+| Selfish | 1/1/0, 100 ticks | 1/1/0, 100 ticks |
+| Withholding | 1/1/0, 5200 ticks | 1/0/0, 7900 ticks |
+| Sybil | 1/0/0, 100 ticks | 1/0/0, 100 ticks |
+
+Les baselines honnêtes bruitées ont respectivement 2, 2, 2, 0 familles FP en
+fixe, et 1, 1, 2, 0 en adaptatif. Les tests de référence calme ont zéro alerte.
+Les nombres sont des observations sur ces exemples, pas des estimations de
+précision/rappel en population. Une anomalie de publication d'un run 51 % est FP
+au sens du classement primaire choisi, sans nier l'anomalie réellement observable.
+
+Effets opérationnels mesurés :
+
+- 51 % : les deux détecteurs alertent après l'acceptation M3 ; la perte reste
+  **1 jeton pédagogique**, sans modification du fork choice. Un autre test avec
+  forks avant acceptation démontre le report réel du règlement par la politique.
+- Selfish : 55,2239 % de blocs actifs sans défense, **44,8276 %** avec probation
+  de 100 ticks, pour 40 % de hash power ; 141 reports effectifs de messages.
+  L'avantage reste positif et le succès M3 reste true. Le délai initial de 20 ticks
+  n'avait pas réduit l'avantage dans cet exemple ; 100 est une configuration
+  expérimentale forte, pas un paramètre prétendument optimisé statistiquement.
+- Pool : récompense totale **48 unités** dans les deux modes, contre 99 dans la
+  baseline appariée. Fixe : 371 shares non créditées, payout adverse de 17,8966
+  à **6,9579** unités. Adaptatif : 291 shares non créditées, payout **9,9401**.
+  Les solutions retenues ne sont pas récupérées ; succès comportemental M3 true.
+- Sybil : deux reconnexions et messages de rattrapage ; la victime reçoit de vrais
+  blocs et l'isolement total échoue. Le rattrapage déclenche aussi une famille FP
+  de publication, conservée dans le résultat protégé.
+
+Les exemples isolent par commutateurs la contre-mesure étudiée. La politique ne
+sélectionne jamais une action à partir du type d'attaque. Une première exécution
+avec toutes les contre-mesures actives a montré des interactions (dont une
+reconnexion inutile en pool) ; les paramètres finaux isolent leurs effets.
+
+### Hypothèses et limites
+
+Formules, seuils, unité d'évaluation, provenance de calibration, coûts et
+contre-mesures sont détaillés dans SIMULATION_MODEL.md. La référence est honnête
+mais déclarative ; les fenêtres se chevauchent, leurs échantillons ne sont pas
+indépendants. Les seuils par défaut sont des choix d'ingénierie non optimisés.
+Les moments sont ancrés pour limiter la contamination ; une dérive normale hors
+bande peut provoquer des FP et nécessiter une nouvelle référence honnête.
+
+Les délais annoncés peuvent être falsifiés hors du modèle d'attaques actuel ;
+la diversité de groupes ne prouve pas l'honnêteté et dépend d'un annuaire fiable.
+Une suspension de crédits peut léser un mineur honnête, une probation un relais
+lent. La politique de confirmations ne protège pas une vente déjà acceptée.
+Aucun changement du consensus par travail cumulé, aucune défense universelle,
+aucun détecteur ML, aucune campagne M5, analyse Python, backend ou frontend.
+CPU réel/RSS non mesurés : les coûts sont des événements/messages/échantillons
+logiques et des délais simulés, distincts des temps réels de CTest.
+
+Le protocole avant généralisation devra valider les seuils, groupes de confiance,
+coûts de probation/suspension et objectifs marchands ; les résultats multi-seeds
+restent à M5. Le périmètre PoS de l'énoncé reste non résolu.
+Aucun commit, mise en index ou push effectué.
+
+Vérification finale après renforcement du test de séparation des labels :
+**44/44 tests réussis, 0 échec, 3,70 s**, script de construction code 0,
+sans avertissement de compilation. `git diff --check` sans erreur de contenu
+(avertissements Git LF/CRLF seulement). Le noyau, main.cpp, exo4.cpp, presets et
+script de test n'ont aucune différence ; SHA-256 d'exo4.cpp toujours
+`DD167B553F5CFB36D0FA0DCD711E2F6B79B915B4434CBAC3D37EEAA6EC76EAD2`.
+Les comparaisons CLI ont été relancées sur la version finale fonctionnelle ;
+le dernier renforcement ne modifie que les assertions de tests.

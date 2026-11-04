@@ -1,6 +1,6 @@
 # Blockchain Security Lab
 
-État : **M2**, simulateur PoW multi-nœuds à événements discrets, avec noyau M1
+État : **M4**, détection statistique et défenses intégrées au simulateur PoW multi-nœuds à événements discrets, avec noyau M1
 conservé. Configurations JSON, topologie, latences, minage probabiliste,
 arbres locaux, forks, travail cumulé et traces de réorganisation sont exécutables.
 `exo4.cpp` reste le code de référence Atelier 1, sans modification et hors compilation.
@@ -98,5 +98,54 @@ variations de calcul flottant entre plateformes ne sont pas garanties identiques
 Voir [le modèle du noyau](docs/SIMULATION_MODEL.md) et
 [l'audit et le journal](docs/DEVELOPMENT_LOG.md). Réseau abstrait fiable, topologie
 fixe et difficulté commune fixe : ni bande passante, ni pertes, ni transactions
-financières réelles. Les attaques M3, pools, récompenses économiques, détection,
-contre-mesures, PoS, backend et frontend sont différés.
+financières réelles. Les campagnes statistiques M5,
+PoS, backend et frontend sont différés.
+
+## M3 : exécuter les attaques
+
+```powershell
+./build/ucrt64/blockchain_sim.exe --config configs/attack_51.json --output results/raw/attack_51
+./build/ucrt64/blockchain_sim.exe --config configs/selfish_mining.json --output results/raw/selfish_mining
+./build/ucrt64/blockchain_sim.exe --config configs/block_withholding.json --output results/raw/block_withholding
+./build/ucrt64/blockchain_sim.exe --config configs/sybil.json --output results/raw/sybil
+```
+
+Chaque exemple a un fichier `_control.json` (même modèle, attaque désactivée) et
+un `_failure.json` (condition d'échec contrôlée). Les résultats bruts incluent
+l'objet `attack`, les paramètres, compteurs de rétention/publication, résultats
+locaux et, pour la pool, shares, solutions complètes et payouts. Le modèle
+scientifique détaille précisément les objectifs de succès et les simplifications.
+Une seed favorable n'est pas une estimation d'efficacité ou de rentabilité.
+Les attaques ne sont pas combinées. PoS, backend et frontend restent différés ; le ML est exclu.
+
+## M4 : détection statistique et mitigation
+
+Aucun Machine Learning. Détecteur fixe de référence et détecteur adaptatif à
+fenêtres glissantes/EWMA, avec alertes explicables et vérité terrain séparée.
+Les règles et formules figurent dans `docs/SIMULATION_MODEL.md`.
+
+```powershell
+./scripts/test-ucrt64.ps1
+./scripts/run-m4-examples.ps1
+```
+
+Le second script exécute quatre calibrations honnêtes (seed 7), puis les 24
+comparaisons : quatre attaques, deux détecteurs, modes baseline/attacked/protected
+(seed 42). Il produit `results/raw/m4/comparison.json`. Les références sont générées
+localement ; une exécution adaptative directe nécessite d'abord son fichier de
+calibration. Aucun téléchargement ni dépendance supplémentaire.
+
+Exécution manuelle, depuis la racine :
+
+```powershell
+./build/ucrt64/blockchain_sim.exe --config configs/m4/sybil_calibration.json --output results/raw/m4/sybil_calibration
+./build/ucrt64/blockchain_sim.exe --config configs/m4/sybil_adaptive_protected.json --output results/raw/m4/sybil_adaptive_protected
+```
+
+Les défenses agissent sur les nouvelles acceptations marchandes, l'attente de
+messages tardifs, le crédit de shares et les connexions/rattrapages P2P. Le choix
+PoW par travail cumulé est conservé. Une alerte n'identifie pas avec certitude une
+attaque. La protection 51 % peut arriver après le paiement ; une pool ne récupère
+pas ses solutions retenues ; une probation peut pénaliser un relais honnête.
+Les exemples conservent leurs faux positifs et ne démontrent aucun taux général
+sur plusieurs seeds. M5, Python, PoS et web restent différés.

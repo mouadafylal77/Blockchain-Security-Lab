@@ -210,3 +210,308 @@ départage lexicographique (qui influence le selfish mining), politique de diffi
 topologie/latences/pertes pertinentes, et périmètre académique PoS. Les pools,
 paiements/double dépense, récompenses, adversaires, détecteurs et mitigations
 restent hors de ce jalon. Aucun résultat de défense n'est déduit de ces exemples.
+
+## M3 : scénarios d'attaque
+
+Les quatre modèles sont intégrés au même moteur événementiel et au fork choice
+M2. `exo4.cpp` et les modules du noyau restent inchangés. Aucun détecteur ni
+contre-mesure M4 n'est ajouté. Chaque configuration fournit un objet `attack` :
+`type` (`51`, `selfish`, `withholding`, `sybil`), `adversary` et `target` (indices
+zéro des nœuds), `confirmations` (1..10000). Options : `enabled` (défaut true),
+`pool_members` et `sybil_identities` (listes d'indices uniques),
+`capture_connections` (défaut true). Les membres et identités sont validés.
+Sans objet attack, M2 reste honnête. Les paramètres normalisés sont exportés.
+
+### Double dépense / 51 %
+
+Un unique jeton pédagogique `coin` préexiste au genesis. La première inclusion
+publique est `spend:coin:merchant`. L'adversaire mine depuis le genesis une branche
+privée contenant `spend:coin:attacker`. Les générateurs ne réincluent aucune dépense
+si l'ascendance en contient déjà une ; ce n'est pas un moteur UTXO générique avec
+signatures ou balances. La confirmation inclut le bloc du paiement lui-même.
+L'acceptation du marchand est mémorisée même si son paiement est ensuite retiré.
+Publication parent d'abord uniquement après acceptation et si la somme des travaux
+privés dépasse le travail de la vue du marchand. Après publication, l'adversaire
+redevient mineur public. Le modèle donne connaissance instantanée des confirmations
+du marchand à l'adversaire (oracle explicite, sans message de vente simulé).
+
+Succès : paiement accepté puis dépense concurrente active dans la vue finale du
+marchand, sans paiement marchand actif. Cela nécessite une réorganisation réelle.
+La fraction adverse n'est pas testée contre un seuil magique de 51 % : un budget
+fini et la seed influencent l'issue. La configuration d'exemple utilise 85 % pour
+un cas pédagogique favorable ; un seuil de confirmations inaccessible échoue
+malgré du travail privé. Un adversaire sans puissance échoue aussi.
+
+### Selfish mining
+
+Le mineur conserve une branche privée sur sa tête publique locale courante.
+Il poursuit sa tête privée tant qu'elle existe. Une modification de sa vue
+publique par concurrence déclenche : publication de toute la branche si son
+travail est au moins égal au travail public ; abandon sinon. Une égalité crée
+une course départagée par la règle de hash M2, les délais et les découvertes
+suivantes. La branche non publiée à la limite d'exécution n'est pas vidée de force.
+L'avance maximale observée et les blocs abandonnés/publiés sont exportés.
+
+Il s'agit d'une stratégie simplifiée de rétention/publication, **pas de la machine
+à états Eyal–Sirer complète** (pas de publication partielle aux avances élevées,
+ni de paramètre gamma imposé). Succès du run : part des blocs actifs de l'adversaire
+dans la vue cible supérieure à sa part de hash power, avec publication effective.
+Cette observation sur une seed ne prouve pas un gain moyen ; comparer les contrôles
+et plusieurs seeds avant toute conclusion de rentabilité.
+
+### Block withholding et pool
+
+`pool_members` désigne les participants ; l'adversaire doit en faire partie.
+La difficulté réseau est au moins 2. Les blocs complets gardent une PoW réelle
+M1 à difficulté d. La difficulté de share est d-1 : le modèle échantillonne les
+shares non complètes à taux 15 fois le taux des blocs complets, avec un RNG
+séparé (`seed XOR 0xd1b54a32d192ed03`). Chaque découverte complète constitue aussi
+une share. Les shares sont des tickets probabilistes comptables : aucun hash
+bas seuil supplémentaire n'est calculé. Leurs délais sont arrondis en ticks
+comme les autres processus ; le ratio empirique peut donc différer de 16.
+
+L'adversaire soumet sa share mais ne publie jamais sa solution complète ; les
+autres membres publient normalement. Les mineurs utilisent la tête locale connue,
+sans serveur de jobs explicite ni latence d'envoi des shares. La pool partage
+une unité de récompense par bloc de ses membres actif dans la vue cible finale,
+au prorata des shares cumulées sur le run (pas de rounds, frais ou PPS réel).
+Les payouts doivent sommer à cette récompense, à l'arrondi flottant près.
+
+Succès comportemental : au moins une solution complète retenue. Les tests exigent
+aussi une perte de récompenses actives face au contrôle apparié sans rétention.
+Le nombre de solutions retenues n'est pas présenté comme une perte économique
+contre-factuelle exacte ; les branches et leurs stale peuvent changer. Un mineur
+adverse de poids zéro échoue tout en laissant la pool honnête fonctionner.
+
+### Sybil / isolement ciblé
+
+`sybil_identities` désigne des nœuds existants contrôlés, distincts de l'adversaire
+et de la cible, tous de hash power zéro. Leur nombre est le budget d'identités.
+La cible est passive (poids zéro). Les liens d'accès des Sybil au réseau honnête
+sont ceux du JSON. Avec `capture_connections=true`, tous les liens de la cible
+sont remplacés par des liens vers ces identités (un tick chacun). Ces relais
+reçoivent les blocs mais filtrent leurs envois vers la victime ; les autres
+échanges suivent M2. La topologie effective est exportée séparément de l'entrée.
+
+Succès : messages effectivement filtrés et victime restant au genesis à l'arrêt.
+Avec `capture_connections=false`, les liens honnêtes de la victime subsistent ;
+l'exemple démontre l'échec de l'isolement total. Ce modèle suppose la capture des
+connexions au démarrage ; il n'établit pas qu'une création d'identités suffit à
+capturer un vrai réseau. Pas de découverte dynamique de pairs, coût d'admission,
+churn ou ajout automatique de hash power. La modification réseau ne change aucun
+poids de mineur.
+
+### Sorties et limites communes
+
+`results.json.attack` ajoute : type, activation, succès selon les définitions
+ci-dessus, acceptation marchande, compteurs retenus/publiés/abandonnés, avance
+privée maximale, hashes encore privés, messages filtrés, blocs actifs adverses et
+leur part dans la vue cible, liens effectifs. Pour la pool : difficultés distinctes,
+shares, solutions soumises/retenues, récompenses actives et payouts par participant.
+Les traces ajoutent `withheld` et `publication`. La liste globale des blocs inclut
+les découvertes privées : la connaissance globale de l'export n'est pas donnée
+aux nœuds. Les délais de propagation des blocs publiés incluent la rétention.
+
+Une seule stratégie adverse par exécution ; pas de combinaison d'attaques.
+L'arrêt peut censurer une branche privée ou des messages. Aucune précision/rappel,
+détection, mitigation, perte monétaire réelle ou sûreté d'un protocole réel n'est
+revendiquée. Les questions PoS et de calibration du modèle M2 restent ouvertes.
+
+## M4 — Détection statistique et défenses opérationnelles
+
+Choix du propriétaire : règles statistiques uniquement, **aucun Machine Learning**.
+Les classes `Detector` et `FeatureExtractor` ne prennent ni simulateur, ni attaque,
+ni vérité terrain en entrée. `Policy` reçoit uniquement les alertes et la
+configuration de défense. Le moteur traduit ses événements publics en télémétrie.
+Les champs privés de M3 restent disponibles pour l'évaluation finale seulement.
+
+### Observations et fenêtres
+
+Audit toutes les `audit_ticks` (100 par défaut), à partir du premier audit.
+Les fenêtres sont `(t-window_ticks,t]` (2000 ticks par défaut), sans accès à des
+échantillons futurs. Un dernier audit non opérationnel peut décrire la fin du run ;
+il ne répare pas un réseau après l'arrêt. Les audits et remises différées consomment
+le budget événementiel. Les autres limites M2 restent applicables.
+
+| Caractéristique observable | Définition | Seuil fixe par défaut |
+|---|---|---:|
+| reorg_depth | Profondeur maximale détachée dans la fenêtre locale | 0,5 bloc |
+| fork_rate | Nombre de nouveaux enfants concurrents / durée observée, limitée à la fenêtre | 0,005 / tick |
+| late_p95 | Quantile empirique de rang plafond(0,95 n), par voisin et première réception du contenu | 40 ticks |
+| stale_ratio | Blocs locaux connectés hors chaîne / blocs connus hors genesis | 0,25 |
+| reward_concentration | Part maximale d'un producteur annoncé dans la chaîne locale active | 1,1 (descriptif, pas d'alerte par défaut) |
+| share_deficit | Déficit de solutions complètes soumises par membre, décrit ci-dessous | 3 |
+| peer_concentration | Taille du plus grand groupe de pairs / degré, si degré >= 2 | 0,8 |
+| silence_ticks | Temps depuis le dernier message reçu, si au moins un voisin | 500 ticks |
+
+`late_p95` utilise l'heure annoncée dans l'en-tête, **pas** le registre privé de
+découverte ; un horodatage malveillant peut donc l'éluder. Les contenus déjà connus
+ou déjà observés ne fournissent pas une nouvelle mesure de retard. Les messages
+répétés prouvent seulement un contact pour `silence_ticks`, pas la fraîcheur de la
+chaîne. Les parts de producteur reposent sur les identités annoncées du modèle M3,
+sans authentification cryptographique ajoutée. Stale et concentration des récompenses
+sont des états locaux courants ; les événements de forks/reorg et retards utilisent
+la fenêtre glissante. Les moyennes/max de propagation globales M2 sont conservées.
+
+Le registre public de pool distingue shares observées, shares créditées et solutions
+complètes **soumises** par membre. Une découverte privée n'est jamais présentée au
+détecteur comme une solution complète trouvée. Pour N shares observées et B solutions
+complètes soumises dans la fenêtre, `E=N/16` et
+`share_deficit=max(0,(E-B)/sqrt(max(1,E)))`. Aucun score avant `min_shares=64`.
+Le dénominateur de type Poisson est une approximation conservatrice par rapport à
+la variance binomiale Np(1-p), p=1/16. L'arrondi temporel M3 déforme le ratio effectif ;
+ni ce score ni le chiffre 3 ne constituent une preuve ou un niveau de confiance garanti.
+La fenêtre pool des exemples est 10000 ticks : avec 2000 ticks, le test constate
+une attaque active non détectée, faute d'accumulation suffisante de shares.
+
+### Référence honnête et calculs adaptatifs
+
+Modes `security.mode` :
+
+- `off` : comportement M1–M3, aucune détection/mitigation ni évaluation M4.
+- `calibration` : exécution honnête, accumulation réelle de moments, aucune alerte ;
+  écrit `calibration.json`. Une attaque active est rejetée dans ce mode.
+- `baseline` : exécution honnête **évaluée**, avec détecteur actif, sans défense.
+- `attacked` : détecteur actif sans défense, attaque selon le JSON.
+- `protected` : mêmes observations/détecteur, application des défenses activées.
+
+La référence adaptative est un fichier externe produit par une exécution de
+calibration antérieure. Le constructeur rejette fichier absent, fenêtres
+incompatibles, moments non finis/négatifs et nombre de mesures inférieur à
+`min_samples=5`. Une métrique absente est ignorée avec compteur explicite, sans
+inventer un seuil appris. Le fichier inclut les paramètres de la source et sa
+version logicielle ; les moments initiaux chargés sont recopiés dans le résultat.
+La provenance est déclarative : le fichier est une entrée scientifique de confiance.
+
+Les moments par métrique (agrégés entre observateurs de la calibration) sont
+calculés par Welford : `delta=x-mu`, `mu'=mu+delta/n`,
+`M2'=M2+delta*(x-mu')`, variance de population `v=M2/n`.
+Ce sont des observations de fenêtres chevauchantes, **pas** n essais indépendants.
+Les exemples calibrent sur seed 7 ; les comparaisons honnête/attaquée/protégée
+utilisent toutes seed 42. Aucun résultat attaqué ou protégé n'entraîne la référence.
+
+Pour chaque flux (observateur, composant, métrique), initialisé aux moments honnêtes :
+
+```text
+B = seuil fixe de la métrique ; s_min = 0,1 B
+s = sqrt(max(v, s_min^2))
+T = max(B, mu + k s)                 # calculé AVANT l'échantillon courant
+alerte si x > T                     # égalité acceptée
+```
+
+Une valeur dépassant T ne met jamais à jour l'EWMA, même si l'alerte est supprimée
+par le cooldown. Sinon :
+
+```text
+x_c = clamp(x, mu-clip*s, mu+clip*s)
+d = x_c-mu
+mu' = clamp(mu+alpha*d, 0, mu_0+drift_cap*s_0)
+v' = min((1-alpha)*(v+alpha*d^2), 4*s_0^2)
+s_0 = sqrt(max(v_0, s_min^2))
+```
+
+Défauts : `alpha=0,1`, `k=3`, `clip=2`, `drift_cap=2`,
+`cooldown_ticks=500` par flux. Le plancher gère la dispersion nulle et l'ancrage
+limite une contamination progressive du seuil. Un changement normal hors de
+cette bande peut produire des faux positifs et nécessite une nouvelle calibration
+honnête explicite ; aucune mise à jour rétroactive n'est faite. Les seuils sont
+un point de départ d'ingénierie configurable, **pas une calibration optimisée**.
+Aucune hypothèse gaussienne justifiant un taux de faux positifs à 3 sigma n'est
+revendiquée. `k`, `alpha`, limites, fenêtres et tous les seuils sont dans le JSON.
+
+Les paramètres numériques doivent être finis et positifs ; alpha <=1, k <=20,
+clip et drift_cap <=10, fenêtres/cooldown <=10^9 ticks, min_samples 2..100000,
+min_shares 1..10^6. Les seuils sont plafonnés à 10^15 pour garder les moments
+finis. Les entiers, booléens et chaînes ne sont pas interchangeables.
+
+### Alertes et unité d'évaluation
+
+Une alerte indique : instant simulé, observateur, composant visible (nœud, pair ou
+participant de pool), famille de comportement, métrique, valeur, seuil réellement
+appliqué et détecteur. Ce n'est pas une identification certaine d'une attaque.
+Les familles sont : `chain_instability`, `publication_anomaly`, `pool_deficit`,
+`connectivity_anomaly`. Les alertes tardives, de reconnection/catch-up ou dues à des
+forks honnêtes sont conservées, pas retirées pour améliorer les scores.
+
+Unité d'évaluation : **(exécution, famille)**, soit quatre unités par run évalué.
+La vérité terrain assigne une famille principale à l'attaque configurée active
+(51 %, selfish, withholding, Sybil respectivement), aucune en baseline. L'exposition
+est l'épisode entier à partir de t=0, même si la tentative échoue ou manque de
+ressources. Une ou plusieurs alertes de cette famille prédisent une unité positive.
+Les alertes des autres familles sont des FP selon cette convention ; cette mesure
+ne prétend pas étiqueter la causalité réelle de chaque fork ou retard. Une attaque
+51 % peut légitimement produire aussi une anomalie de publication ; cette dernière
+reste FP de classement primaire dans ce protocole, et non une observation fausse.
+
+TP/FP/TN/FN sont calculés dans `metrics/detection_evaluation`, **après** le run.
+`precision=TP/(TP+FP)`, `recall=TP/(TP+FN)`, `F1=2PR/(P+R)` ; zéro si dénominateur
+nul. Les compteurs restent disponibles pour distinguer absence de cas et score nul.
+Latence : premier tick d'alerte de la famille exposée moins 0 ; null si absente.
+C'est une latence depuis le début de l'exposition, pas depuis une découverte privée
+inobservable ou depuis la première preuve. Aucune information de vérité terrain
+n'entre dans les caractéristiques, les EWMA ou les décisions opérationnelles.
+
+### Contre-mesures
+
+Les commutateurs `mitigate_confirmations`, `mitigate_publication`, `mitigate_pool`,
+`mitigate_peers` sont indépendants, activés seulement en mode protected. Les exemples
+isolent la contre-mesure correspondante, par configuration explicite. Le détecteur
+et la politique ne consultent jamais le type d'attaque pour décider d'une action.
+
+- Instabilité de chaîne : suspension de **nouvelles** acceptations durant
+  `hold_ticks=500`, et confirmations élevées de `ceil(profondeur)+3`, plafonnées à
+  `max_confirmations=100` sans abaisser la règle initiale. À expiration, retour à
+  la règle initiale. Aucune vente déjà acceptée n'est annulée, aucun bloc PoW valide
+  n'est refusé, aucun checkpoint n'est ajouté. L'effet réel sur l'instant
+  d'acceptation est testé. L'exemple M3 de majorité reste réussi car le signal est
+  trop tardif ; les confirmations ne suppriment pas une majorité de hash power.
+- Publication anormalement tardive : probation du voisin observé pendant
+  hold_ticks ; les nouveaux contenus reçus de ce voisin sont mis en file pendant
+  `publication_delay` (20 par défaut, 100 dans l'exemple selfish). Une remise
+  différée n'est pas mise en attente une deuxième fois. Les règles de validité,
+  travail cumulé et départage restent inchangées. Ce délai expérimental affecte
+  propagation et minage local ; il peut aussi nuire à un relais honnête lent et
+  n'empêche pas une publication par un autre chemin. Le choix de 100 ticks
+  (cinq intervalles moyens dans l'exemple) démontre un effet, sans être optimisé.
+- Déficit de pool : suspension prospective du **crédit** de shares pendant hold_ticks.
+  Les shares reçues restent observées pour l'audit, les crédits anciens restent
+  acquis, les solutions complètes soumises et blocs valides restent acceptés.
+  Les payouts M3 sont recalculés sur les crédits effectifs. Cela peut réduire la
+  rémunération d'un participant suspect ; cela ne restaure pas les blocs retenus
+  et peut pénaliser un mineur honnête malchanceux. Aucun seuil ne prouve une fraude.
+- Anomalie de connectivité : limitation locale `max_peers=4`,
+  `max_per_group=1`, conservation des voisins admissibles puis connexion à des
+  groupes distincts d'un annuaire bootstrap public dans l'ordre déterministe.
+  L'attribut optionnel `nodes[].peer_group` représente un groupe administratif
+  observable (préfixe/organisation), jamais le label Sybil ; par défaut l'id.
+  Il est supposé fourni par un mécanisme d'admission fiable. Un groupe distinct
+  n'est pas une garantie d'honnêteté et les déclarations falsifiables affaiblissent
+  cette défense. Les nouvelles connexions utilisent un tick ; les deux extrémités
+  échangent leurs **chaînes actives locales connues**, sans registre omniscient.
+  Les messages déjà en transit restent livrables. Les quotas s'appliquent à la
+  sélection locale du nœud réagissant, pas à une optimisation globale de topologie.
+
+Aucune contre-mesure ne change la sélection PoW par travail cumulé. Toutes peuvent
+modifier les observations et les trajectoires de minage par leur effet réseau ou
+commercial. Les attaquants M3 ne s'adaptent pas à la défense en changeant de stratégie.
+
+### Sorties, coûts et comparaisons
+
+`results.json.security` contient alertes, paramètres (dans config.security), moments
+initiaux importés, voisins finaux, confusion, P/R/F1, latence, coûts et unités
+économiques. Un jeton est perdu dans le modèle 51 % lorsqu'un paiement accepté est
+renversé ; une unité de pool correspond à un bloc actif de membre dans la vue cible.
+Le contre-factuel de perte de pool vient du contrôle apparié, pas d'une estimation
+magique des solutions cachées. Les payouts et parts actives M3 sont conservés.
+
+Coûts : messages totaux M2, événements traités, audits, caractéristiques évaluées,
+nombre maximal d'échantillons conservés, reports de messages et somme de leurs
+délais, reconnexions, messages de rattrapage et shares non créditées. Les échantillons
+sont des unités logiques de stockage, **pas** une mesure RSS en octets. Les ticks
+ne sont pas du temps CPU ; CPU réel/RSS ne sont pas mesurés. Les durées CTest sont
+seulement des durées réelles de vérification, pas un surcoût simulé de défense.
+
+`configs/m4/` fournit 4 calibrations et 24 cas comparatifs. Le script
+`scripts/run-m4-examples.ps1` exécute ces exemples fixes et écrit
+`results/raw/m4/comparison.json`. Ce n'est pas une campagne multi-seeds M5.
+Les FP, FN, limites de détection et défenses insuffisantes font partie des résultats.

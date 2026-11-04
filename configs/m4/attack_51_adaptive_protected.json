@@ -1,0 +1,57 @@
+{
+  "scenario": "attack_51_adaptive_protected",
+  "seed": 42,
+  "duration_ticks": 100000,
+  "max_events": 100000,
+  "max_blocks": 100,
+  "max_pending_events": 100000,
+  "difficulty": 1,
+  "mining_attempts": 1000000,
+  "mean_block_ticks": 20,
+  "nodes": [
+    {
+      "id": "alice",
+      "hash_power": 85
+    },
+    {
+      "id": "bob",
+      "hash_power": 15
+    },
+    {
+      "id": "observer",
+      "hash_power": 0
+    }
+  ],
+  "links": [
+    {
+      "from": "alice",
+      "to": "bob",
+      "latency_ticks": 5,
+      "jitter_ticks": 2
+    },
+    {
+      "from": "bob",
+      "to": "observer",
+      "latency_ticks": 5,
+      "jitter_ticks": 2
+    }
+  ],
+  "attack": {
+    "type": "51",
+    "adversary": 0,
+    "target": 1,
+    "confirmations": 2,
+    "enabled": true
+  },
+  "security": {
+    "mode": "protected",
+    "detector": "adaptive",
+    "window_ticks": 2000,
+    "audit_ticks": 100,
+    "reference_file": "results/raw/m4/attack_51_calibration/calibration.json",
+    "mitigate_confirmations": true,
+    "mitigate_publication": false,
+    "mitigate_pool": false,
+    "mitigate_peers": false
+  }
+}

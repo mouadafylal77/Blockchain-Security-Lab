@@ -1,0 +1,61 @@
+{
+  "scenario": "block_withholding_adaptive_baseline",
+  "seed": 42,
+  "duration_ticks": 100000,
+  "max_events": 100000,
+  "max_blocks": 100,
+  "max_pending_events": 100000,
+  "difficulty": 2,
+  "mining_attempts": 1000000,
+  "mean_block_ticks": 200,
+  "nodes": [
+    {
+      "id": "alice",
+      "hash_power": 40
+    },
+    {
+      "id": "bob",
+      "hash_power": 60
+    },
+    {
+      "id": "observer",
+      "hash_power": 0
+    }
+  ],
+  "links": [
+    {
+      "from": "alice",
+      "to": "bob",
+      "latency_ticks": 5,
+      "jitter_ticks": 2
+    },
+    {
+      "from": "bob",
+      "to": "observer",
+      "latency_ticks": 5,
+      "jitter_ticks": 2
+    }
+  ],
+  "attack": {
+    "type": "withholding",
+    "adversary": 0,
+    "target": 1,
+    "confirmations": 2,
+    "pool_members": [
+      0,
+      1
+    ],
+    "enabled": false
+  },
+  "security": {
+    "mode": "baseline",
+    "detector": "adaptive",
+    "window_ticks": 10000,
+    "audit_ticks": 100,
+    "reference_file": "results/raw/m4/block_withholding_calibration/calibration.json",
+    "mitigate_confirmations": false,
+    "mitigate_publication": false,
+    "mitigate_pool": true,
+    "mitigate_peers": false
+  }
+}

@@ -8,6 +8,7 @@ public:
     explicit Network(const Config& config);
     const std::vector<Peer>& peers(std::size_t node) const { return peers_.at(node); }
     Time delay(const Peer& peer) { return peer.latency + rng_.uniform_ticks(peer.jitter); }
+    std::vector<std::size_t> set_peers(std::size_t node,const std::vector<std::size_t>& desired);
 private:
     std::vector<std::vector<Peer>> peers_;
     Rng rng_;

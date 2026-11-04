@@ -1,5 +1,6 @@
 #include "sim/config.hpp"
 #include "core/block.hpp"
+#include "detection/config_io.hpp"
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <set>
@@ -27,6 +28,9 @@ double number(const Json& value) {
 }
 }
 void validate_config(const Config& c) {
+    attacks::validate(c);
+    detection::validate(c.security);
+    if((c.security.mode=="baseline" || c.security.mode=="calibration") && c.attack.type!="none" && c.attack.enabled) throw std::invalid_argument("Calibration baseline must be honest");
     if (c.scenario.empty() || c.scenario.size() > 128) throw std::invalid_argument("Invalid scenario name");
     if (!c.duration_ticks || c.duration_ticks > 1000000000000ULL) throw std::invalid_argument("Invalid duration_ticks");
     if (!c.max_events || c.max_events > 1000000 || !c.max_blocks || c.max_blocks > 10000
@@ -39,6 +43,7 @@ void validate_config(const Config& c) {
     std::set<std::string> ids;
     double total = 0;
     for (const auto& n : c.nodes) {
+        if(n.peer_group.size()>64) throw std::invalid_argument("Peer group too long");
         if (n.id.empty() || n.id.size() > 64 || !ids.insert(n.id).second) throw std::invalid_argument("Invalid or duplicate node id");
         if (!std::isfinite(n.hash_power) || n.hash_power < 0 || n.hash_power > 1e12) throw std::invalid_argument("Invalid hash_power");
         total += n.hash_power;
@@ -69,8 +74,10 @@ Config parse_config(const std::string& text) {
         return true;
     });
     fields(json, {"scenario", "seed", "duration_ticks", "max_events", "max_blocks", "max_pending_events",
-        "difficulty", "mining_attempts", "mean_block_ticks", "nodes", "links"});
+        "difficulty", "mining_attempts", "mean_block_ticks", "nodes", "links", "attack", "security"});
     Config c;
+    if(json.contains("security")) c.security=detection::parse_config(json.at("security").dump());
+    if (json.contains("attack")) c.attack = attacks::parse_config(json.at("attack").dump());
     c.scenario = json.at("scenario").get<std::string>();
     c.seed = integer(json.at("seed"));
     c.duration_ticks = integer(json.at("duration_ticks"));
@@ -85,10 +92,10 @@ Config parse_config(const std::string& text) {
     if (!json.at("nodes").is_array() || !json.at("links").is_array()) throw std::invalid_argument("nodes and links must be arrays");
     std::map<std::string, std::size_t> ids;
     for (const auto& n : json.at("nodes")) {
-        fields(n, {"id", "hash_power"});
+        fields(n, {"id", "hash_power", "peer_group"});
         const auto id = n.at("id").get<std::string>();
         if (!ids.emplace(id, c.nodes.size()).second) throw std::invalid_argument("Duplicate node id");
-        c.nodes.push_back({id, number(n.at("hash_power"))});
+        c.nodes.push_back({id, number(n.at("hash_power")), n.value("peer_group",std::string{})});
     }
     for (const auto& l : json.at("links")) {
         fields(l, {"from", "to", "latency_ticks", "jitter_ticks"});
@@ -110,10 +117,10 @@ Config load_config(const std::string& path) {
 }
 std::string config_json(const Config& c) {
     Json nodes = Json::array(), links = Json::array();
-    for (const auto& n : c.nodes) nodes.push_back({{"id", n.id}, {"hash_power", n.hash_power}});
+    for (const auto& n : c.nodes) nodes.push_back({{"id", n.id}, {"hash_power", n.hash_power}, {"peer_group",n.peer_group}});
     for (const auto& l : c.links) links.push_back({{"from", c.nodes.at(l.from).id}, {"to", c.nodes.at(l.to).id},
         {"latency_ticks", l.latency}, {"jitter_ticks", l.jitter}});
-    return Json{{"scenario", c.scenario}, {"seed", c.seed}, {"duration_ticks", c.duration_ticks},
+    return Json{{"security",Json::parse(detection::config_json(c.security))},{"attack", Json::parse(attacks::config_json(c.attack))}, {"scenario", c.scenario}, {"seed", c.seed}, {"duration_ticks", c.duration_ticks},
         {"max_events", c.max_events}, {"max_blocks", c.max_blocks}, {"max_pending_events", c.max_pending_events},
         {"difficulty", c.difficulty}, {"mining_attempts", c.mining_attempts}, {"mean_block_ticks", c.mean_block_ticks},
         {"nodes", nodes}, {"links", links}}.dump();

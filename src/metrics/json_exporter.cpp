@@ -1,4 +1,6 @@
 #include "metrics/json_exporter.hpp"
+#include "metrics/security_export.hpp"
+#include "detection/config_io.hpp"
 #include <nlohmann/json.hpp>
 #include <filesystem>
 #include <fstream>
@@ -30,7 +32,7 @@ std::string results_json(const sim::Simulator& sim) {
         {"type", record.type}, {"block", record.hash}, {"old_tip", record.old_tip}, {"new_tip", record.new_tip},
         {"detached_depth", record.depth}});
     const auto mean = m.propagation_samples ? static_cast<double>(m.propagation_sum_ticks) / static_cast<double>(m.propagation_samples) : 0;
-    return Json{{"schema_version", 1}, {"software_version", BSL_VERSION}, {"model", "m2_pow_ticks_v1"},
+    return Json{{"security",Json::parse(security_json(sim))},{"attack", Json::parse(attacks::results_json(sim))}, {"schema_version", 1}, {"software_version", BSL_VERSION}, {"model", "m2_pow_ticks_v1"},
         {"build", {{"compiler", __VERSION__}, {"cplusplus", __cplusplus}}},
         {"config", Json::parse(sim::config_json(sim.config()))},
         {"execution", {{"stop_reason", sim.stop_reason()}, {"last_event_tick", sim.now()}, {"pending_events", sim.pending_events()}}},
@@ -55,5 +57,13 @@ void write_results(const sim::Simulator& simulator, const std::string& output_di
     file << results_json(simulator);
     file.close();
     if (!file) throw std::runtime_error("Cannot write results.json");
+    if(simulator.config().security.mode=="calibration"){
+        std::ofstream reference(directory / "calibration.json",std::ios::binary | std::ios::trunc);
+        auto calibration=Json::parse(detection::reference_json(simulator.config().security,simulator.detector()));
+        calibration["source_config"]=Json::parse(sim::config_json(simulator.config()));
+        calibration["software_version"]=BSL_VERSION;
+        reference << calibration.dump(2) << '\n';reference.close();
+        if(!reference)throw std::runtime_error("Cannot write calibration.json");
+    }
 }
 }
