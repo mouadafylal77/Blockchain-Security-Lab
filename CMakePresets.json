@@ -1,0 +1,24 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": { "major": 3, "minor": 21, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "ucrt64",
+      "displayName": "MSYS2 UCRT64 / GCC / Ninja",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/ucrt64",
+      "environment": {
+        "MSYS2_UCRT64_ROOT": "C:/msys64/ucrt64",
+        "PATH": "$env{MSYS2_UCRT64_ROOT}/bin;$penv{PATH}"
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_COMPILER": "$env{MSYS2_UCRT64_ROOT}/bin/g++.exe",
+        "OPENSSL_ROOT_DIR": "$env{MSYS2_UCRT64_ROOT}",
+        "BUILD_TESTING": "ON"
+      }
+    }
+  ],
+  "buildPresets": [{ "name": "ucrt64", "configurePreset": "ucrt64", "jobs": 2 }],
+  "testPresets": [{ "name": "ucrt64", "configurePreset": "ucrt64", "execution": { "jobs": 2 }, "output": { "outputOnFailure": true } }]
+}
