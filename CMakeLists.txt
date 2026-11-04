@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(BlockchainSecurityLab VERSION 0.1.0 LANGUAGES CXX)
+project(BlockchainSecurityLab VERSION 0.2.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -9,15 +9,24 @@ find_package(OpenSSL REQUIRED COMPONENTS Crypto)
 add_library(blockchain_core
     src/core/sha256.cpp
     src/core/block.cpp
-    src/core/blockchain.cpp)
+    src/core/blockchain.cpp
+    src/core/block_tree.cpp)
 target_include_directories(blockchain_core PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_link_libraries(blockchain_core PUBLIC OpenSSL::Crypto)
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(blockchain_core PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
-add_executable(blockchain_sim src/main.cpp)
-target_link_libraries(blockchain_sim PRIVATE blockchain_core)
+add_library(blockchain_simulation src/sim/config.cpp src/sim/network.cpp src/sim/simulator.cpp
+    src/metrics/json_exporter.cpp)
+target_include_directories(blockchain_simulation SYSTEM PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
+target_link_libraries(blockchain_simulation PUBLIC blockchain_core)
+target_compile_definitions(blockchain_simulation PRIVATE BSL_VERSION="${PROJECT_VERSION}")
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(blockchain_simulation PRIVATE -Wall -Wextra -Wpedantic)
+endif()
+add_executable(blockchain_sim src/main.cpp src/cli.cpp)
+target_link_libraries(blockchain_sim PRIVATE blockchain_simulation)
 
 include(CTest)
 if(BUILD_TESTING)
@@ -36,4 +45,19 @@ if(BUILD_TESTING)
     set_tests_properties(core_sha256 core_merkle core_valid_chain core_invalid_parent
         core_tampering core_genesis core_pow core_boundaries core_deterministic
         cli_demo cli_help cli_invalid_argument cli_extra_argument PROPERTIES TIMEOUT 20)
+    add_executable(test_simulation tests/test_simulation.cpp)
+    target_link_libraries(test_simulation PRIVATE blockchain_simulation)
+    target_include_directories(test_simulation SYSTEM PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
+    target_compile_definitions(test_simulation PRIVATE BSL_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+    foreach(case_name event_order rng network network_disorder hash_power local_views pending duplicates fork_choice reorganization
+            invalid_blocks reproducibility config_invalid limits metrics demo_fork)
+        add_test(NAME sim_${case_name} COMMAND test_simulation ${case_name})
+        set_tests_properties(sim_${case_name} PROPERTIES TIMEOUT 30)
+    endforeach()
+    add_test(NAME cli_simulation COMMAND blockchain_sim --config "${CMAKE_CURRENT_SOURCE_DIR}/configs/baseline.json"
+        --output "${CMAKE_CURRENT_BINARY_DIR}/test-results/cli")
+    add_test(NAME cli_missing_config COMMAND blockchain_sim --config "${CMAKE_CURRENT_BINARY_DIR}/missing.json"
+        --output "${CMAKE_CURRENT_BINARY_DIR}/test-results/missing")
+    set_tests_properties(cli_simulation PROPERTIES TIMEOUT 30 PASS_REGULAR_EXPRESSION "blocks=")
+    set_tests_properties(cli_missing_config PROPERTIES TIMEOUT 20 WILL_FAIL TRUE)
 endif()

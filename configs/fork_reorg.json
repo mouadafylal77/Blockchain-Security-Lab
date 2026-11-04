@@ -1,0 +1,21 @@
+{
+  "scenario": "fork_reorg",
+  "seed": 42,
+  "duration_ticks": 3000,
+  "max_events": 10000,
+  "max_blocks": 12,
+  "max_pending_events": 10000,
+  "difficulty": 1,
+  "mining_attempts": 1000000,
+  "mean_block_ticks": 20,
+  "nodes": [
+    { "id": "alice", "hash_power": 50 },
+    { "id": "bob", "hash_power": 50 },
+    { "id": "observer", "hash_power": 0 }
+  ],
+  "links": [
+    { "from": "alice", "to": "bob", "latency_ticks": 40, "jitter_ticks": 10 },
+    { "from": "bob", "to": "observer", "latency_ticks": 10, "jitter_ticks": 3 },
+    { "from": "alice", "to": "observer", "latency_ticks": 50, "jitter_ticks": 10 }
+  ]
+}
