@@ -1,0 +1,1799 @@
+{
+  "attack_51_adaptive_attacked.json": {
+    "scenario": "attack_51_adaptive_attacked",
+    "seed": 42,
+    "duration_ticks": 100000,
+    "max_events": 100000,
+    "max_blocks": 100,
+    "max_pending_events": 100000,
+    "difficulty": 1,
+    "mining_attempts": 1000000,
+    "mean_block_ticks": 20,
+    "nodes": [
+      {
+        "id": "alice",
+        "hash_power": 85
+      },
+      {
+        "id": "bob",
+        "hash_power": 15
+      },
+      {
+        "id": "observer",
+        "hash_power": 0
+      }
+    ],
+    "links": [
+      {
+        "from": "alice",
+        "to": "bob",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "bob",
+        "to": "observer",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      }
+    ],
+    "attack": {
+      "type": "51",
+      "adversary": 0,
+      "target": 1,
+      "confirmations": 2,
+      "enabled": true
+    },
+    "security": {
+      "mode": "attacked",
+      "detector": "adaptive",
+      "window_ticks": 2000,
+      "audit_ticks": 100,
+      "reference_file": "results/raw/m4/attack_51_calibration/calibration.json",
+      "mitigate_confirmations": true,
+      "mitigate_publication": false,
+      "mitigate_pool": false,
+      "mitigate_peers": false
+    }
+  },
+  "attack_51_adaptive_baseline.json": {
+    "scenario": "attack_51_adaptive_baseline",
+    "seed": 42,
+    "duration_ticks": 100000,
+    "max_events": 100000,
+    "max_blocks": 100,
+    "max_pending_events": 100000,
+    "difficulty": 1,
+    "mining_attempts": 1000000,
+    "mean_block_ticks": 20,
+    "nodes": [
+      {
+        "id": "alice",
+        "hash_power": 85
+      },
+      {
+        "id": "bob",
+        "hash_power": 15
+      },
+      {
+        "id": "observer",
+        "hash_power": 0
+      }
+    ],
+    "links": [
+      {
+        "from": "alice",
+        "to": "bob",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "bob",
+        "to": "observer",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      }
+    ],
+    "attack": {
+      "type": "51",
+      "adversary": 0,
+      "target": 1,
+      "confirmations": 2,
+      "enabled": false
+    },
+    "security": {
+      "mode": "baseline",
+      "detector": "adaptive",
+      "window_ticks": 2000,
+      "audit_ticks": 100,
+      "reference_file": "results/raw/m4/attack_51_calibration/calibration.json",
+      "mitigate_confirmations": true,
+      "mitigate_publication": false,
+      "mitigate_pool": false,
+      "mitigate_peers": false
+    }
+  },
+  "attack_51_adaptive_protected.json": {
+    "scenario": "attack_51_adaptive_protected",
+    "seed": 42,
+    "duration_ticks": 100000,
+    "max_events": 100000,
+    "max_blocks": 100,
+    "max_pending_events": 100000,
+    "difficulty": 1,
+    "mining_attempts": 1000000,
+    "mean_block_ticks": 20,
+    "nodes": [
+      {
+        "id": "alice",
+        "hash_power": 85
+      },
+      {
+        "id": "bob",
+        "hash_power": 15
+      },
+      {
+        "id": "observer",
+        "hash_power": 0
+      }
+    ],
+    "links": [
+      {
+        "from": "alice",
+        "to": "bob",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "bob",
+        "to": "observer",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      }
+    ],
+    "attack": {
+      "type": "51",
+      "adversary": 0,
+      "target": 1,
+      "confirmations": 2,
+      "enabled": true
+    },
+    "security": {
+      "mode": "protected",
+      "detector": "adaptive",
+      "window_ticks": 2000,
+      "audit_ticks": 100,
+      "reference_file": "results/raw/m4/attack_51_calibration/calibration.json",
+      "mitigate_confirmations": true,
+      "mitigate_publication": false,
+      "mitigate_pool": false,
+      "mitigate_peers": false
+    }
+  },
+  "attack_51_calibration.json": {
+    "scenario": "attack_51_calibration",
+    "seed": 7,
+    "duration_ticks": 100000,
+    "max_events": 100000,
+    "max_blocks": 100,
+    "max_pending_events": 100000,
+    "difficulty": 1,
+    "mining_attempts": 1000000,
+    "mean_block_ticks": 20,
+    "nodes": [
+      {
+        "id": "alice",
+        "hash_power": 85
+      },
+      {
+        "id": "bob",
+        "hash_power": 15
+      },
+      {
+        "id": "observer",
+        "hash_power": 0
+      }
+    ],
+    "links": [
+      {
+        "from": "alice",
+        "to": "bob",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "bob",
+        "to": "observer",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      }
+    ],
+    "attack": {
+      "type": "51",
+      "adversary": 0,
+      "target": 1,
+      "confirmations": 2,
+      "enabled": false
+    },
+    "security": {
+      "mode": "calibration",
+      "detector": "adaptive",
+      "window_ticks": 2000,
+      "audit_ticks": 100,
+      "mitigate_confirmations": true,
+      "mitigate_publication": false,
+      "mitigate_pool": false,
+      "mitigate_peers": false
+    }
+  },
+  "attack_51_fixed_attacked.json": {
+    "scenario": "attack_51_fixed_attacked",
+    "seed": 42,
+    "duration_ticks": 100000,
+    "max_events": 100000,
+    "max_blocks": 100,
+    "max_pending_events": 100000,
+    "difficulty": 1,
+    "mining_attempts": 1000000,
+    "mean_block_ticks": 20,
+    "nodes": [
+      {
+        "id": "alice",
+        "hash_power": 85
+      },
+      {
+        "id": "bob",
+        "hash_power": 15
+      },
+      {
+        "id": "observer",
+        "hash_power": 0
+      }
+    ],
+    "links": [
+      {
+        "from": "alice",
+        "to": "bob",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "bob",
+        "to": "observer",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      }
+    ],
+    "attack": {
+      "type": "51",
+      "adversary": 0,
+      "target": 1,
+      "confirmations": 2,
+      "enabled": true
+    },
+    "security": {
+      "mode": "attacked",
+      "detector": "fixed",
+      "window_ticks": 2000,
+      "audit_ticks": 100,
+      "mitigate_confirmations": true,
+      "mitigate_publication": false,
+      "mitigate_pool": false,
+      "mitigate_peers": false
+    }
+  },
+  "attack_51_fixed_baseline.json": {
+    "scenario": "attack_51_fixed_baseline",
+    "seed": 42,
+    "duration_ticks": 100000,
+    "max_events": 100000,
+    "max_blocks": 100,
+    "max_pending_events": 100000,
+    "difficulty": 1,
+    "mining_attempts": 1000000,
+    "mean_block_ticks": 20,
+    "nodes": [
+      {
+        "id": "alice",
+        "hash_power": 85
+      },
+      {
+        "id": "bob",
+        "hash_power": 15
+      },
+      {
+        "id": "observer",
+        "hash_power": 0
+      }
+    ],
+    "links": [
+      {
+        "from": "alice",
+        "to": "bob",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "bob",
+        "to": "observer",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      }
+    ],
+    "attack": {
+      "type": "51",
+      "adversary": 0,
+      "target": 1,
+      "confirmations": 2,
+      "enabled": false
+    },
+    "security": {
+      "mode": "baseline",
+      "detector": "fixed",
+      "window_ticks": 2000,
+      "audit_ticks": 100,
+      "mitigate_confirmations": true,
+      "mitigate_publication": false,
+      "mitigate_pool": false,
+      "mitigate_peers": false
+    }
+  },
+  "attack_51_fixed_protected.json": {
+    "scenario": "attack_51_fixed_protected",
+    "seed": 42,
+    "duration_ticks": 100000,
+    "max_events": 100000,
+    "max_blocks": 100,
+    "max_pending_events": 100000,
+    "difficulty": 1,
+    "mining_attempts": 1000000,
+    "mean_block_ticks": 20,
+    "nodes": [
+      {
+        "id": "alice",
+        "hash_power": 85
+      },
+      {
+        "id": "bob",
+        "hash_power": 15
+      },
+      {
+        "id": "observer",
+        "hash_power": 0
+      }
+    ],
+    "links": [
+      {
+        "from": "alice",
+        "to": "bob",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "bob",
+        "to": "observer",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      }
+    ],
+    "attack": {
+      "type": "51",
+      "adversary": 0,
+      "target": 1,
+      "confirmations": 2,
+      "enabled": true
+    },
+    "security": {
+      "mode": "protected",
+      "detector": "fixed",
+      "window_ticks": 2000,
+      "audit_ticks": 100,
+      "mitigate_confirmations": true,
+      "mitigate_publication": false,
+      "mitigate_pool": false,
+      "mitigate_peers": false
+    }
+  },
+  "block_withholding_adaptive_attacked.json": {
+    "scenario": "block_withholding_adaptive_attacked",
+    "seed": 42,
+    "duration_ticks": 100000,
+    "max_events": 100000,
+    "max_blocks": 100,
+    "max_pending_events": 100000,
+    "difficulty": 2,
+    "mining_attempts": 1000000,
+    "mean_block_ticks": 200,
+    "nodes": [
+      {
+        "id": "alice",
+        "hash_power": 40
+      },
+      {
+        "id": "bob",
+        "hash_power": 60
+      },
+      {
+        "id": "observer",
+        "hash_power": 0
+      }
+    ],
+    "links": [
+      {
+        "from": "alice",
+        "to": "bob",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "bob",
+        "to": "observer",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      }
+    ],
+    "attack": {
+      "type": "withholding",
+      "adversary": 0,
+      "target": 1,
+      "confirmations": 2,
+      "pool_members": [
+        0,
+        1
+      ],
+      "enabled": true
+    },
+    "security": {
+      "mode": "attacked",
+      "detector": "adaptive",
+      "window_ticks": 10000,
+      "audit_ticks": 100,
+      "reference_file": "results/raw/m4/block_withholding_calibration/calibration.json",
+      "mitigate_confirmations": false,
+      "mitigate_publication": false,
+      "mitigate_pool": true,
+      "mitigate_peers": false
+    }
+  },
+  "block_withholding_adaptive_baseline.json": {
+    "scenario": "block_withholding_adaptive_baseline",
+    "seed": 42,
+    "duration_ticks": 100000,
+    "max_events": 100000,
+    "max_blocks": 100,
+    "max_pending_events": 100000,
+    "difficulty": 2,
+    "mining_attempts": 1000000,
+    "mean_block_ticks": 200,
+    "nodes": [
+      {
+        "id": "alice",
+        "hash_power": 40
+      },
+      {
+        "id": "bob",
+        "hash_power": 60
+      },
+      {
+        "id": "observer",
+        "hash_power": 0
+      }
+    ],
+    "links": [
+      {
+        "from": "alice",
+        "to": "bob",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "bob",
+        "to": "observer",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      }
+    ],
+    "attack": {
+      "type": "withholding",
+      "adversary": 0,
+      "target": 1,
+      "confirmations": 2,
+      "pool_members": [
+        0,
+        1
+      ],
+      "enabled": false
+    },
+    "security": {
+      "mode": "baseline",
+      "detector": "adaptive",
+      "window_ticks": 10000,
+      "audit_ticks": 100,
+      "reference_file": "results/raw/m4/block_withholding_calibration/calibration.json",
+      "mitigate_confirmations": false,
+      "mitigate_publication": false,
+      "mitigate_pool": true,
+      "mitigate_peers": false
+    }
+  },
+  "block_withholding_adaptive_protected.json": {
+    "scenario": "block_withholding_adaptive_protected",
+    "seed": 42,
+    "duration_ticks": 100000,
+    "max_events": 100000,
+    "max_blocks": 100,
+    "max_pending_events": 100000,
+    "difficulty": 2,
+    "mining_attempts": 1000000,
+    "mean_block_ticks": 200,
+    "nodes": [
+      {
+        "id": "alice",
+        "hash_power": 40
+      },
+      {
+        "id": "bob",
+        "hash_power": 60
+      },
+      {
+        "id": "observer",
+        "hash_power": 0
+      }
+    ],
+    "links": [
+      {
+        "from": "alice",
+        "to": "bob",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "bob",
+        "to": "observer",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      }
+    ],
+    "attack": {
+      "type": "withholding",
+      "adversary": 0,
+      "target": 1,
+      "confirmations": 2,
+      "pool_members": [
+        0,
+        1
+      ],
+      "enabled": true
+    },
+    "security": {
+      "mode": "protected",
+      "detector": "adaptive",
+      "window_ticks": 10000,
+      "audit_ticks": 100,
+      "reference_file": "results/raw/m4/block_withholding_calibration/calibration.json",
+      "mitigate_confirmations": false,
+      "mitigate_publication": false,
+      "mitigate_pool": true,
+      "mitigate_peers": false
+    }
+  },
+  "block_withholding_calibration.json": {
+    "scenario": "block_withholding_calibration",
+    "seed": 7,
+    "duration_ticks": 100000,
+    "max_events": 100000,
+    "max_blocks": 100,
+    "max_pending_events": 100000,
+    "difficulty": 2,
+    "mining_attempts": 1000000,
+    "mean_block_ticks": 200,
+    "nodes": [
+      {
+        "id": "alice",
+        "hash_power": 40
+      },
+      {
+        "id": "bob",
+        "hash_power": 60
+      },
+      {
+        "id": "observer",
+        "hash_power": 0
+      }
+    ],
+    "links": [
+      {
+        "from": "alice",
+        "to": "bob",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "bob",
+        "to": "observer",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      }
+    ],
+    "attack": {
+      "type": "withholding",
+      "adversary": 0,
+      "target": 1,
+      "confirmations": 2,
+      "pool_members": [
+        0,
+        1
+      ],
+      "enabled": false
+    },
+    "security": {
+      "mode": "calibration",
+      "detector": "adaptive",
+      "window_ticks": 10000,
+      "audit_ticks": 100,
+      "mitigate_confirmations": false,
+      "mitigate_publication": false,
+      "mitigate_pool": true,
+      "mitigate_peers": false
+    }
+  },
+  "block_withholding_fixed_attacked.json": {
+    "scenario": "block_withholding_fixed_attacked",
+    "seed": 42,
+    "duration_ticks": 100000,
+    "max_events": 100000,
+    "max_blocks": 100,
+    "max_pending_events": 100000,
+    "difficulty": 2,
+    "mining_attempts": 1000000,
+    "mean_block_ticks": 200,
+    "nodes": [
+      {
+        "id": "alice",
+        "hash_power": 40
+      },
+      {
+        "id": "bob",
+        "hash_power": 60
+      },
+      {
+        "id": "observer",
+        "hash_power": 0
+      }
+    ],
+    "links": [
+      {
+        "from": "alice",
+        "to": "bob",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "bob",
+        "to": "observer",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      }
+    ],
+    "attack": {
+      "type": "withholding",
+      "adversary": 0,
+      "target": 1,
+      "confirmations": 2,
+      "pool_members": [
+        0,
+        1
+      ],
+      "enabled": true
+    },
+    "security": {
+      "mode": "attacked",
+      "detector": "fixed",
+      "window_ticks": 10000,
+      "audit_ticks": 100,
+      "mitigate_confirmations": false,
+      "mitigate_publication": false,
+      "mitigate_pool": true,
+      "mitigate_peers": false
+    }
+  },
+  "block_withholding_fixed_baseline.json": {
+    "scenario": "block_withholding_fixed_baseline",
+    "seed": 42,
+    "duration_ticks": 100000,
+    "max_events": 100000,
+    "max_blocks": 100,
+    "max_pending_events": 100000,
+    "difficulty": 2,
+    "mining_attempts": 1000000,
+    "mean_block_ticks": 200,
+    "nodes": [
+      {
+        "id": "alice",
+        "hash_power": 40
+      },
+      {
+        "id": "bob",
+        "hash_power": 60
+      },
+      {
+        "id": "observer",
+        "hash_power": 0
+      }
+    ],
+    "links": [
+      {
+        "from": "alice",
+        "to": "bob",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "bob",
+        "to": "observer",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      }
+    ],
+    "attack": {
+      "type": "withholding",
+      "adversary": 0,
+      "target": 1,
+      "confirmations": 2,
+      "pool_members": [
+        0,
+        1
+      ],
+      "enabled": false
+    },
+    "security": {
+      "mode": "baseline",
+      "detector": "fixed",
+      "window_ticks": 10000,
+      "audit_ticks": 100,
+      "mitigate_confirmations": false,
+      "mitigate_publication": false,
+      "mitigate_pool": true,
+      "mitigate_peers": false
+    }
+  },
+  "block_withholding_fixed_protected.json": {
+    "scenario": "block_withholding_fixed_protected",
+    "seed": 42,
+    "duration_ticks": 100000,
+    "max_events": 100000,
+    "max_blocks": 100,
+    "max_pending_events": 100000,
+    "difficulty": 2,
+    "mining_attempts": 1000000,
+    "mean_block_ticks": 200,
+    "nodes": [
+      {
+        "id": "alice",
+        "hash_power": 40
+      },
+      {
+        "id": "bob",
+        "hash_power": 60
+      },
+      {
+        "id": "observer",
+        "hash_power": 0
+      }
+    ],
+    "links": [
+      {
+        "from": "alice",
+        "to": "bob",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "bob",
+        "to": "observer",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      }
+    ],
+    "attack": {
+      "type": "withholding",
+      "adversary": 0,
+      "target": 1,
+      "confirmations": 2,
+      "pool_members": [
+        0,
+        1
+      ],
+      "enabled": true
+    },
+    "security": {
+      "mode": "protected",
+      "detector": "fixed",
+      "window_ticks": 10000,
+      "audit_ticks": 100,
+      "mitigate_confirmations": false,
+      "mitigate_publication": false,
+      "mitigate_pool": true,
+      "mitigate_peers": false
+    }
+  },
+  "selfish_mining_adaptive_attacked.json": {
+    "scenario": "selfish_mining_adaptive_attacked",
+    "seed": 42,
+    "duration_ticks": 100000,
+    "max_events": 100000,
+    "max_blocks": 100,
+    "max_pending_events": 100000,
+    "difficulty": 1,
+    "mining_attempts": 1000000,
+    "mean_block_ticks": 20,
+    "nodes": [
+      {
+        "id": "alice",
+        "hash_power": 40
+      },
+      {
+        "id": "bob",
+        "hash_power": 60
+      },
+      {
+        "id": "observer",
+        "hash_power": 0
+      }
+    ],
+    "links": [
+      {
+        "from": "alice",
+        "to": "bob",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "bob",
+        "to": "observer",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      }
+    ],
+    "attack": {
+      "type": "selfish",
+      "adversary": 0,
+      "target": 1,
+      "confirmations": 2,
+      "enabled": true
+    },
+    "security": {
+      "mode": "attacked",
+      "detector": "adaptive",
+      "window_ticks": 2000,
+      "audit_ticks": 100,
+      "reference_file": "results/raw/m4/selfish_mining_calibration/calibration.json",
+      "mitigate_confirmations": false,
+      "mitigate_publication": true,
+      "mitigate_pool": false,
+      "mitigate_peers": false,
+      "publication_delay": 100
+    }
+  },
+  "selfish_mining_adaptive_baseline.json": {
+    "scenario": "selfish_mining_adaptive_baseline",
+    "seed": 42,
+    "duration_ticks": 100000,
+    "max_events": 100000,
+    "max_blocks": 100,
+    "max_pending_events": 100000,
+    "difficulty": 1,
+    "mining_attempts": 1000000,
+    "mean_block_ticks": 20,
+    "nodes": [
+      {
+        "id": "alice",
+        "hash_power": 40
+      },
+      {
+        "id": "bob",
+        "hash_power": 60
+      },
+      {
+        "id": "observer",
+        "hash_power": 0
+      }
+    ],
+    "links": [
+      {
+        "from": "alice",
+        "to": "bob",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "bob",
+        "to": "observer",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      }
+    ],
+    "attack": {
+      "type": "selfish",
+      "adversary": 0,
+      "target": 1,
+      "confirmations": 2,
+      "enabled": false
+    },
+    "security": {
+      "mode": "baseline",
+      "detector": "adaptive",
+      "window_ticks": 2000,
+      "audit_ticks": 100,
+      "reference_file": "results/raw/m4/selfish_mining_calibration/calibration.json",
+      "mitigate_confirmations": false,
+      "mitigate_publication": true,
+      "mitigate_pool": false,
+      "mitigate_peers": false,
+      "publication_delay": 100
+    }
+  },
+  "selfish_mining_adaptive_protected.json": {
+    "scenario": "selfish_mining_adaptive_protected",
+    "seed": 42,
+    "duration_ticks": 100000,
+    "max_events": 100000,
+    "max_blocks": 100,
+    "max_pending_events": 100000,
+    "difficulty": 1,
+    "mining_attempts": 1000000,
+    "mean_block_ticks": 20,
+    "nodes": [
+      {
+        "id": "alice",
+        "hash_power": 40
+      },
+      {
+        "id": "bob",
+        "hash_power": 60
+      },
+      {
+        "id": "observer",
+        "hash_power": 0
+      }
+    ],
+    "links": [
+      {
+        "from": "alice",
+        "to": "bob",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "bob",
+        "to": "observer",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      }
+    ],
+    "attack": {
+      "type": "selfish",
+      "adversary": 0,
+      "target": 1,
+      "confirmations": 2,
+      "enabled": true
+    },
+    "security": {
+      "mode": "protected",
+      "detector": "adaptive",
+      "window_ticks": 2000,
+      "audit_ticks": 100,
+      "reference_file": "results/raw/m4/selfish_mining_calibration/calibration.json",
+      "mitigate_confirmations": false,
+      "mitigate_publication": true,
+      "mitigate_pool": false,
+      "mitigate_peers": false,
+      "publication_delay": 100
+    }
+  },
+  "selfish_mining_calibration.json": {
+    "scenario": "selfish_mining_calibration",
+    "seed": 7,
+    "duration_ticks": 100000,
+    "max_events": 100000,
+    "max_blocks": 100,
+    "max_pending_events": 100000,
+    "difficulty": 1,
+    "mining_attempts": 1000000,
+    "mean_block_ticks": 20,
+    "nodes": [
+      {
+        "id": "alice",
+        "hash_power": 40
+      },
+      {
+        "id": "bob",
+        "hash_power": 60
+      },
+      {
+        "id": "observer",
+        "hash_power": 0
+      }
+    ],
+    "links": [
+      {
+        "from": "alice",
+        "to": "bob",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "bob",
+        "to": "observer",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      }
+    ],
+    "attack": {
+      "type": "selfish",
+      "adversary": 0,
+      "target": 1,
+      "confirmations": 2,
+      "enabled": false
+    },
+    "security": {
+      "mode": "calibration",
+      "detector": "adaptive",
+      "window_ticks": 2000,
+      "audit_ticks": 100,
+      "mitigate_confirmations": false,
+      "mitigate_publication": true,
+      "mitigate_pool": false,
+      "mitigate_peers": false,
+      "publication_delay": 100
+    }
+  },
+  "selfish_mining_fixed_attacked.json": {
+    "scenario": "selfish_mining_fixed_attacked",
+    "seed": 42,
+    "duration_ticks": 100000,
+    "max_events": 100000,
+    "max_blocks": 100,
+    "max_pending_events": 100000,
+    "difficulty": 1,
+    "mining_attempts": 1000000,
+    "mean_block_ticks": 20,
+    "nodes": [
+      {
+        "id": "alice",
+        "hash_power": 40
+      },
+      {
+        "id": "bob",
+        "hash_power": 60
+      },
+      {
+        "id": "observer",
+        "hash_power": 0
+      }
+    ],
+    "links": [
+      {
+        "from": "alice",
+        "to": "bob",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "bob",
+        "to": "observer",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      }
+    ],
+    "attack": {
+      "type": "selfish",
+      "adversary": 0,
+      "target": 1,
+      "confirmations": 2,
+      "enabled": true
+    },
+    "security": {
+      "mode": "attacked",
+      "detector": "fixed",
+      "window_ticks": 2000,
+      "audit_ticks": 100,
+      "mitigate_confirmations": false,
+      "mitigate_publication": true,
+      "mitigate_pool": false,
+      "mitigate_peers": false,
+      "publication_delay": 100
+    }
+  },
+  "selfish_mining_fixed_baseline.json": {
+    "scenario": "selfish_mining_fixed_baseline",
+    "seed": 42,
+    "duration_ticks": 100000,
+    "max_events": 100000,
+    "max_blocks": 100,
+    "max_pending_events": 100000,
+    "difficulty": 1,
+    "mining_attempts": 1000000,
+    "mean_block_ticks": 20,
+    "nodes": [
+      {
+        "id": "alice",
+        "hash_power": 40
+      },
+      {
+        "id": "bob",
+        "hash_power": 60
+      },
+      {
+        "id": "observer",
+        "hash_power": 0
+      }
+    ],
+    "links": [
+      {
+        "from": "alice",
+        "to": "bob",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "bob",
+        "to": "observer",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      }
+    ],
+    "attack": {
+      "type": "selfish",
+      "adversary": 0,
+      "target": 1,
+      "confirmations": 2,
+      "enabled": false
+    },
+    "security": {
+      "mode": "baseline",
+      "detector": "fixed",
+      "window_ticks": 2000,
+      "audit_ticks": 100,
+      "mitigate_confirmations": false,
+      "mitigate_publication": true,
+      "mitigate_pool": false,
+      "mitigate_peers": false,
+      "publication_delay": 100
+    }
+  },
+  "selfish_mining_fixed_protected.json": {
+    "scenario": "selfish_mining_fixed_protected",
+    "seed": 42,
+    "duration_ticks": 100000,
+    "max_events": 100000,
+    "max_blocks": 100,
+    "max_pending_events": 100000,
+    "difficulty": 1,
+    "mining_attempts": 1000000,
+    "mean_block_ticks": 20,
+    "nodes": [
+      {
+        "id": "alice",
+        "hash_power": 40
+      },
+      {
+        "id": "bob",
+        "hash_power": 60
+      },
+      {
+        "id": "observer",
+        "hash_power": 0
+      }
+    ],
+    "links": [
+      {
+        "from": "alice",
+        "to": "bob",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "bob",
+        "to": "observer",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      }
+    ],
+    "attack": {
+      "type": "selfish",
+      "adversary": 0,
+      "target": 1,
+      "confirmations": 2,
+      "enabled": true
+    },
+    "security": {
+      "mode": "protected",
+      "detector": "fixed",
+      "window_ticks": 2000,
+      "audit_ticks": 100,
+      "mitigate_confirmations": false,
+      "mitigate_publication": true,
+      "mitigate_pool": false,
+      "mitigate_peers": false,
+      "publication_delay": 100
+    }
+  },
+  "sybil_adaptive_attacked.json": {
+    "scenario": "sybil_adaptive_attacked",
+    "seed": 42,
+    "duration_ticks": 3000,
+    "max_events": 100000,
+    "max_blocks": 20,
+    "max_pending_events": 100000,
+    "difficulty": 1,
+    "mining_attempts": 1000000,
+    "mean_block_ticks": 100,
+    "nodes": [
+      {
+        "id": "alice",
+        "hash_power": 60
+      },
+      {
+        "id": "bob",
+        "hash_power": 40
+      },
+      {
+        "id": "observer",
+        "hash_power": 0
+      },
+      {
+        "id": "sybil1",
+        "hash_power": 0,
+        "peer_group": "network-c"
+      },
+      {
+        "id": "sybil2",
+        "hash_power": 0,
+        "peer_group": "network-c"
+      }
+    ],
+    "links": [
+      {
+        "from": "alice",
+        "to": "bob",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "bob",
+        "to": "observer",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "alice",
+        "to": "sybil1",
+        "latency_ticks": 2,
+        "jitter_ticks": 0
+      },
+      {
+        "from": "bob",
+        "to": "sybil2",
+        "latency_ticks": 2,
+        "jitter_ticks": 0
+      }
+    ],
+    "attack": {
+      "type": "sybil",
+      "adversary": 0,
+      "target": 2,
+      "confirmations": 2,
+      "sybil_identities": [
+        3,
+        4
+      ],
+      "enabled": true
+    },
+    "security": {
+      "mode": "attacked",
+      "detector": "adaptive",
+      "window_ticks": 2000,
+      "audit_ticks": 100,
+      "reference_file": "results/raw/m4/sybil_calibration/calibration.json",
+      "mitigate_confirmations": false,
+      "mitigate_publication": false,
+      "mitigate_pool": false,
+      "mitigate_peers": true
+    }
+  },
+  "sybil_adaptive_baseline.json": {
+    "scenario": "sybil_adaptive_baseline",
+    "seed": 42,
+    "duration_ticks": 3000,
+    "max_events": 100000,
+    "max_blocks": 20,
+    "max_pending_events": 100000,
+    "difficulty": 1,
+    "mining_attempts": 1000000,
+    "mean_block_ticks": 100,
+    "nodes": [
+      {
+        "id": "alice",
+        "hash_power": 60
+      },
+      {
+        "id": "bob",
+        "hash_power": 40
+      },
+      {
+        "id": "observer",
+        "hash_power": 0
+      },
+      {
+        "id": "sybil1",
+        "hash_power": 0,
+        "peer_group": "network-c"
+      },
+      {
+        "id": "sybil2",
+        "hash_power": 0,
+        "peer_group": "network-c"
+      }
+    ],
+    "links": [
+      {
+        "from": "alice",
+        "to": "bob",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "bob",
+        "to": "observer",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "alice",
+        "to": "sybil1",
+        "latency_ticks": 2,
+        "jitter_ticks": 0
+      },
+      {
+        "from": "bob",
+        "to": "sybil2",
+        "latency_ticks": 2,
+        "jitter_ticks": 0
+      }
+    ],
+    "attack": {
+      "type": "sybil",
+      "adversary": 0,
+      "target": 2,
+      "confirmations": 2,
+      "sybil_identities": [
+        3,
+        4
+      ],
+      "enabled": false
+    },
+    "security": {
+      "mode": "baseline",
+      "detector": "adaptive",
+      "window_ticks": 2000,
+      "audit_ticks": 100,
+      "reference_file": "results/raw/m4/sybil_calibration/calibration.json",
+      "mitigate_confirmations": false,
+      "mitigate_publication": false,
+      "mitigate_pool": false,
+      "mitigate_peers": true
+    }
+  },
+  "sybil_adaptive_protected.json": {
+    "scenario": "sybil_adaptive_protected",
+    "seed": 42,
+    "duration_ticks": 3000,
+    "max_events": 100000,
+    "max_blocks": 20,
+    "max_pending_events": 100000,
+    "difficulty": 1,
+    "mining_attempts": 1000000,
+    "mean_block_ticks": 100,
+    "nodes": [
+      {
+        "id": "alice",
+        "hash_power": 60
+      },
+      {
+        "id": "bob",
+        "hash_power": 40
+      },
+      {
+        "id": "observer",
+        "hash_power": 0
+      },
+      {
+        "id": "sybil1",
+        "hash_power": 0,
+        "peer_group": "network-c"
+      },
+      {
+        "id": "sybil2",
+        "hash_power": 0,
+        "peer_group": "network-c"
+      }
+    ],
+    "links": [
+      {
+        "from": "alice",
+        "to": "bob",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "bob",
+        "to": "observer",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "alice",
+        "to": "sybil1",
+        "latency_ticks": 2,
+        "jitter_ticks": 0
+      },
+      {
+        "from": "bob",
+        "to": "sybil2",
+        "latency_ticks": 2,
+        "jitter_ticks": 0
+      }
+    ],
+    "attack": {
+      "type": "sybil",
+      "adversary": 0,
+      "target": 2,
+      "confirmations": 2,
+      "sybil_identities": [
+        3,
+        4
+      ],
+      "enabled": true
+    },
+    "security": {
+      "mode": "protected",
+      "detector": "adaptive",
+      "window_ticks": 2000,
+      "audit_ticks": 100,
+      "reference_file": "results/raw/m4/sybil_calibration/calibration.json",
+      "mitigate_confirmations": false,
+      "mitigate_publication": false,
+      "mitigate_pool": false,
+      "mitigate_peers": true
+    }
+  },
+  "sybil_calibration.json": {
+    "scenario": "sybil_calibration",
+    "seed": 7,
+    "duration_ticks": 3000,
+    "max_events": 100000,
+    "max_blocks": 20,
+    "max_pending_events": 100000,
+    "difficulty": 1,
+    "mining_attempts": 1000000,
+    "mean_block_ticks": 100,
+    "nodes": [
+      {
+        "id": "alice",
+        "hash_power": 60
+      },
+      {
+        "id": "bob",
+        "hash_power": 40
+      },
+      {
+        "id": "observer",
+        "hash_power": 0
+      },
+      {
+        "id": "sybil1",
+        "hash_power": 0,
+        "peer_group": "network-c"
+      },
+      {
+        "id": "sybil2",
+        "hash_power": 0,
+        "peer_group": "network-c"
+      }
+    ],
+    "links": [
+      {
+        "from": "alice",
+        "to": "bob",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "bob",
+        "to": "observer",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "alice",
+        "to": "sybil1",
+        "latency_ticks": 2,
+        "jitter_ticks": 0
+      },
+      {
+        "from": "bob",
+        "to": "sybil2",
+        "latency_ticks": 2,
+        "jitter_ticks": 0
+      }
+    ],
+    "attack": {
+      "type": "sybil",
+      "adversary": 0,
+      "target": 2,
+      "confirmations": 2,
+      "sybil_identities": [
+        3,
+        4
+      ],
+      "enabled": false
+    },
+    "security": {
+      "mode": "calibration",
+      "detector": "adaptive",
+      "window_ticks": 2000,
+      "audit_ticks": 100,
+      "mitigate_confirmations": false,
+      "mitigate_publication": false,
+      "mitigate_pool": false,
+      "mitigate_peers": true
+    }
+  },
+  "sybil_fixed_attacked.json": {
+    "scenario": "sybil_fixed_attacked",
+    "seed": 42,
+    "duration_ticks": 3000,
+    "max_events": 100000,
+    "max_blocks": 20,
+    "max_pending_events": 100000,
+    "difficulty": 1,
+    "mining_attempts": 1000000,
+    "mean_block_ticks": 100,
+    "nodes": [
+      {
+        "id": "alice",
+        "hash_power": 60
+      },
+      {
+        "id": "bob",
+        "hash_power": 40
+      },
+      {
+        "id": "observer",
+        "hash_power": 0
+      },
+      {
+        "id": "sybil1",
+        "hash_power": 0,
+        "peer_group": "network-c"
+      },
+      {
+        "id": "sybil2",
+        "hash_power": 0,
+        "peer_group": "network-c"
+      }
+    ],
+    "links": [
+      {
+        "from": "alice",
+        "to": "bob",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "bob",
+        "to": "observer",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "alice",
+        "to": "sybil1",
+        "latency_ticks": 2,
+        "jitter_ticks": 0
+      },
+      {
+        "from": "bob",
+        "to": "sybil2",
+        "latency_ticks": 2,
+        "jitter_ticks": 0
+      }
+    ],
+    "attack": {
+      "type": "sybil",
+      "adversary": 0,
+      "target": 2,
+      "confirmations": 2,
+      "sybil_identities": [
+        3,
+        4
+      ],
+      "enabled": true
+    },
+    "security": {
+      "mode": "attacked",
+      "detector": "fixed",
+      "window_ticks": 2000,
+      "audit_ticks": 100,
+      "mitigate_confirmations": false,
+      "mitigate_publication": false,
+      "mitigate_pool": false,
+      "mitigate_peers": true
+    }
+  },
+  "sybil_fixed_baseline.json": {
+    "scenario": "sybil_fixed_baseline",
+    "seed": 42,
+    "duration_ticks": 3000,
+    "max_events": 100000,
+    "max_blocks": 20,
+    "max_pending_events": 100000,
+    "difficulty": 1,
+    "mining_attempts": 1000000,
+    "mean_block_ticks": 100,
+    "nodes": [
+      {
+        "id": "alice",
+        "hash_power": 60
+      },
+      {
+        "id": "bob",
+        "hash_power": 40
+      },
+      {
+        "id": "observer",
+        "hash_power": 0
+      },
+      {
+        "id": "sybil1",
+        "hash_power": 0,
+        "peer_group": "network-c"
+      },
+      {
+        "id": "sybil2",
+        "hash_power": 0,
+        "peer_group": "network-c"
+      }
+    ],
+    "links": [
+      {
+        "from": "alice",
+        "to": "bob",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "bob",
+        "to": "observer",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "alice",
+        "to": "sybil1",
+        "latency_ticks": 2,
+        "jitter_ticks": 0
+      },
+      {
+        "from": "bob",
+        "to": "sybil2",
+        "latency_ticks": 2,
+        "jitter_ticks": 0
+      }
+    ],
+    "attack": {
+      "type": "sybil",
+      "adversary": 0,
+      "target": 2,
+      "confirmations": 2,
+      "sybil_identities": [
+        3,
+        4
+      ],
+      "enabled": false
+    },
+    "security": {
+      "mode": "baseline",
+      "detector": "fixed",
+      "window_ticks": 2000,
+      "audit_ticks": 100,
+      "mitigate_confirmations": false,
+      "mitigate_publication": false,
+      "mitigate_pool": false,
+      "mitigate_peers": true
+    }
+  },
+  "sybil_fixed_protected.json": {
+    "scenario": "sybil_fixed_protected",
+    "seed": 42,
+    "duration_ticks": 3000,
+    "max_events": 100000,
+    "max_blocks": 20,
+    "max_pending_events": 100000,
+    "difficulty": 1,
+    "mining_attempts": 1000000,
+    "mean_block_ticks": 100,
+    "nodes": [
+      {
+        "id": "alice",
+        "hash_power": 60
+      },
+      {
+        "id": "bob",
+        "hash_power": 40
+      },
+      {
+        "id": "observer",
+        "hash_power": 0
+      },
+      {
+        "id": "sybil1",
+        "hash_power": 0,
+        "peer_group": "network-c"
+      },
+      {
+        "id": "sybil2",
+        "hash_power": 0,
+        "peer_group": "network-c"
+      }
+    ],
+    "links": [
+      {
+        "from": "alice",
+        "to": "bob",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "bob",
+        "to": "observer",
+        "latency_ticks": 5,
+        "jitter_ticks": 2
+      },
+      {
+        "from": "alice",
+        "to": "sybil1",
+        "latency_ticks": 2,
+        "jitter_ticks": 0
+      },
+      {
+        "from": "bob",
+        "to": "sybil2",
+        "latency_ticks": 2,
+        "jitter_ticks": 0
+      }
+    ],
+    "attack": {
+      "type": "sybil",
+      "adversary": 0,
+      "target": 2,
+      "confirmations": 2,
+      "sybil_identities": [
+        3,
+        4
+      ],
+      "enabled": true
+    },
+    "security": {
+      "mode": "protected",
+      "detector": "fixed",
+      "window_ticks": 2000,
+      "audit_ticks": 100,
+      "mitigate_confirmations": false,
+      "mitigate_publication": false,
+      "mitigate_pool": false,
+      "mitigate_peers": true
+    }
+  }
+}

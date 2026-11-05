@@ -618,3 +618,146 @@ script de test n'ont aucune différence ; SHA-256 d'exo4.cpp toujours
 `DD167B553F5CFB36D0FA0DCD711E2F6B79B915B4434CBAC3D37EEAA6EC76EAD2`.
 Les comparaisons CLI ont été relancées sur la version finale fonctionnelle ;
 le dernier renforcement ne modifie que les assertions de tests.
+
+## 2026-11-04 — M5 : benchmark sur 30 seeds, M4 strictement gelé
+
+Demande du propriétaire appliquée : évaluation uniquement. Sources relues :
+AGENTS, PLAN, projet, SIMULATION_MODEL, journal, README, configurations M4,
+orchestrateur M4, métriques, détecteurs et politiques. Les scripts Python et les
+figures sont autorisés explicitement par cette demande M5. Aucune source C++,
+configuration M4, stratégie, seuil ou mitigation n'a été modifié. Aucun build
+ni CTest relancé : les 44 tests M1–M4 étaient déjà validés.
+
+### Protocole et gel de référence
+
+- Commit : `9cd1db52813cdb3fc03ac21fc2a3aab6256ce1d3`.
+- `analysis/m5_reference.json` enregistre les SHA-256 de 106 fichiers d'entrée
+  et cinq binaires/DLL, l'état Git, l'environnement et le préfixe historique
+  intégral de ce journal. Le gel couvre aussi les fichiers hors suivi Git.
+- Binaire exécuté : SHA-256
+  `933ed797816cd66d4ec162536f29d6ebf9f1f7221f685da47f3a782f7d092179`.
+- Seeds finales préenregistrées dans `analysis/m5_protocol.json` : **1001 à 1030**
+  incluses, 30 distinctes, sans 7 ni 42. Quatre profils M4, deux détecteurs,
+  trois modes : **720 évaluations**.
+- Quatre calibrations honnêtes seed 7, configurations M4 de calibration conservées.
+  Une référence gelée par profil, partagée entre les 90 évaluations adaptatives
+  correspondantes. Aucun apprentissage sur les données attaquées/protégées.
+- Les configurations temporaires changent uniquement seed et chemin de référence.
+  Hash power, topologie, difficultés, fenêtres, seuils et budgets sont inchangés.
+- Une seule simulation C++ à la fois, jamais de multiprocessing ; aucun graphique
+  pendant les simulations. Traitement d'un JSON détaillé à la fois, résumés légers
+  seulement en mémoire pour l'analyse.
+
+### Automatisation et vérifications réalisées
+
+Nouveaux scripts sous analysis/ : benchmark.py, aggregate.py,
+audit_statistics.py, test_benchmark.py, test_statistics.py ; protocole, preuves,
+paramètres archivés et README_M5.md. Aucun fichier M4 remplacé.
+L'orchestrateur utilise un verrou Windows, un manifeste JSONL avec fsync,
+des empreintes par résultat/configuration/résumé et des tentatives distinctes.
+Ctrl+C termine le processus actif ; une reprise vérifie les artefacts avant de
+les sauter. Les erreurs restent enregistrées et ne deviennent pas des résultats
+fictifs. Le budget du moteur n'est jamais augmenté.
+
+Commandes réellement exécutées avec Python 3.11.9 installé :
+
+```powershell
+$m5Python = 'C:\Users\LENOVO\AppData\Local\Programs\Python\Python311\python.exe'
+& $m5Python -B -m unittest discover -s analysis -p 'test_*.py' -v
+& $m5Python -B analysis/benchmark.py freeze
+& $m5Python -B analysis/benchmark.py pilot
+& $m5Python -B analysis/benchmark.py run
+& $m5Python -B analysis/benchmark.py repair
+& $m5Python -B analysis/aggregate.py
+& $m5Python -B analysis/audit_statistics.py
+& $m5Python -B analysis/benchmark.py verify
+```
+
+Le pilote a exécuté quatre calibrations, deux évaluations distinctes (seeds
+9001/9002) et une répétition 9001 : sept processus réussis, exclus des 720.
+La répétition donne exactement le même SHA-256. La reprise du pilote a lancé
+zéro simulation et reconnu les sept artefacts valides.
+
+La campagne principale a lancé **720 processus C++, tous code 0**. Une erreur de
+l'extracteur Python (`hash` au lieu de `block` pour la trace de probation) a
+empêché les résumés de 60 runs selfish protégés. Les données brutes étaient
+présentes et valides. Après correction de l'extracteur et ajout d'un test,
+`repair` a reconstruit ces 60 résumés **sans relancer le C++** ; les événements
+d'erreur initiaux restent dans le manifeste. Aucun résultat ni seed supprimé.
+La reprise finale a lancé zéro C++ et validé 724 artefacts (720 + 4 calibrations).
+
+Bilan exact : **720/720 évaluations valides**, 30 par chacune des 24 combinaisons ;
+4 calibrations + 3 pilotes = **727 lancements C++ au total**, zéro échec de processus.
+**Dix tests Python réussis** (orchestration, reprise/journal tronqué, validation,
+bootstrap, valeurs connues, manque de données, appariement, micro/macro et Wilson).
+L'audit indépendant stdlib vérifie 1272 lignes statistiques, 1484 comparaisons
+appariées et les paramètres/empreintes des **727 entrées réellement exécutées**.
+Les processus fixes/adaptatifs sans mitigation ont aussi des signatures de
+production de blocs identiques par seed.
+
+### Restitution et résultats principaux
+
+Rapport : `analysis/M5_BENCHMARK_REPORT.md`. Quatre tables CSV sous
+analysis/tables/ : 720 résumés, 24 campagnes, statistiques complètes et différences
+appariées. Six figures PNG et SVG sous analysis/figures/. Données détaillées et
+manifeste conservés dans `results/raw/m5_30seeds/`, ignorés par Git.
+Les statistiques utilisent 5000 bootstrap par seed (seed de bootstrap 20261104),
+IC 95 %, moyennes/médianes/écarts-types/min/max et effectifs disponibles.
+Les différences sont formées avant bootstrap. Les 720 runs ne sont pas traités
+comme indépendants d'un même effet ; les familles ne sont pas des attaques
+indépendantes. Les latences non détectées restent censurées et non imputées.
+Les proportions 0/30 ou 30/30 ont aussi un IC Wilson, car le bootstrap peut être
+dégénéré. Les IC restent conditionnels à la calibration M4 unique par profil.
+
+- **51 %** : 30/30 doubles dépenses réussies, avec et sans défense, pour les deux
+  détecteurs ; perte moyenne 1 jeton. Le fixe détecte 30/30, l'adaptatif 28/30
+  (deux FN). Latences conditionnelles moyennes 273,3 et 321,4 ticks. La défense
+  marchande arrive après l'acceptation ; le modèle n'a pas été retouché.
+- **Selfish** : succès au sens M3 10/30 attaqués, 4/30 protégés. Part active moyenne
+  **38,97 % → 26,39 %**, contre 40 % de hash power. Différence moyenne d'environ
+  **−12,59 points**, IC bootstrap 95 % environ [−15,9 ; −9,1]. Le modèle selfish
+  n'est pas rentable en moyenne au sens de ce proxy sur ces seeds. Sur **3/30**
+  paires, la défense augmente pourtant la part adverse. La seed 42 n'était donc
+  pas représentative d'un gain moyen garanti. Hausse des stale et reports de
+  contenus honnêtes conservés parmi les coûts.
+- **Withholding** : 39,57 solutions complètes retenues en moyenne. Récompense pool
+  98,63 en baseline, **60,43** attaquée et protégée : les blocs ne sont pas récupérés.
+  Payout adverse 24,31 sans défense, **8,18** en fixe et **11,92** en adaptatif.
+  Détection moyenne 4660 contre 7300 ticks ; précision micro 0,50 contre 0,75
+  sur les runs attaqués, rappel 1. Aucune share honnête non créditée sur ces
+  30 runs par détecteur, sans prétendre à un risque nul.
+- **Sybil** : isolement 30/30 sans défense, **0/30** protégé. Adoption valide après
+  reconnexion : moyenne 39,13 ticks, médiane 4,5, plage 1–176 (n=30). Coût réseau
+  moyen supplémentaire ~109,17 messages. Les groupes supposés fiables et le
+  bootstrap restent des hypothèses du modèle, pas une garantie sur un vrai P2P.
+
+Les baselines bruyantes comportent des FP : totaux de familles FP fixe/adaptatif
+48/12 (51 %), 57/20 (selfish), 53/45 (pool), 17/17 (Sybil), sur 120 unités de
+classement mais 30 clusters indépendants par cas. Ces erreurs sont conservées.
+Le rapport distingue les FP de classement primaire des anomalies réellement
+observables d'une autre famille.
+
+### Ressources et limites documentées
+
+Mesures réellement prises : **84,500 s de CPU C++ cumulé** (727 processus,
+GetProcessTimes), maximum RSS C++ échantillonné à ~10 ms **13,44 MiB**,
+RSS observée entre runs de l'orchestrateur **29,46 MiB**, données brutes de
+campagne **127,13 MiB** au moment de l'analyse. Ces RSS ne sont pas des garanties
+de pic exact. Les durées réelles dépendent aussi de la machine ; les mesures de
+coût CPU/wall sont exploratoires, distinctes des ticks simulés.
+
+NumPy/pandas/psutil étaient déjà présents. Pour tracer les figures, Matplotlib
+et ses petites dépendances ont été téléchargés après autorisation et installés
+uniquement dans `build/m5-python`, sans installation globale ni dépendance du
+moteur. Versions enregistrées dans analysis/requirements-m5.txt et m5_integrity.json.
+
+Non disponibles exactement dans les exports : confirmations au moment de
+l'acceptation, effets spécifiques sur chaque relais émetteur honnête, blocs
+uniques attribuables exclusivement au rattrapage. Les métriques/proxies disponibles
+et les raisons sont explicités. Le coût d'une fausse sanction sur un scénario
+entièrement honnête protégé n'est pas isolé par les trois modes M4 de référence.
+Aucun budget augmenté ni scénario supplémentaire inventé pour combler ces limites.
+
+Les empreintes M4 et le préfixe historique de ce journal sont inchangés.
+Aucun commit, push, changement de M4, FastAPI ou frontend. La tâche s'arrête
+à la livraison des benchmarks pour examen personnel du propriétaire.

@@ -1,0 +1,27 @@
+{
+  "verified_utc": "2026-11-04T22:16:27.515465+00:00",
+  "reference_manifest_sha256": "b76336a2f79ba4b82ac762d7e3fdb758ef34f488d19fca2644b968de0aaebe7e",
+  "m4_unchanged": true,
+  "git_commit": "9cd1db52813cdb3fc03ac21fc2a3aab6256ce1d3",
+  "input_files_verified": 106,
+  "binaries_verified": 5,
+  "evaluation_valid": 720,
+  "calibrations_valid": 4,
+  "pilot_valid": 3,
+  "cpp_launches": 727,
+  "cpp_failures": 0,
+  "python_extraction_errors_repaired_without_cpp": 60,
+  "source_csv_sha256": "536f28451db63ce764576301ee8a3d70d3586bf1630341b4aa3f297e883b6a7e",
+  "analysis_sha256": "bdc859e80a953bb20061b623bab8766f35f30cbcb27fab3a77fbcc9934b860b3",
+  "environment": {
+    "numpy": "2.4.4",
+    "matplotlib": "3.9.2",
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]"
+  },
+  "resources": {
+    "cpp_cpu_seconds": 84.5,
+    "sampled_cpp_peak_rss_bytes": 14094336,
+    "observed_orchestrator_rss_bytes": 30887936,
+    "raw_campaign_bytes": 133304432
+  }
+}
