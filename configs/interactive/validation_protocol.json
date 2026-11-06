@@ -1,0 +1,13 @@
+{
+  "model": "pow_terminal_v2",
+  "powers_percent": [0, 10, 30, 49, 51, 65, 85],
+  "validation_seed_first": 2001,
+  "validation_seed_last": 2030,
+  "calibration_seed": 3001,
+  "detectors": ["fixed", "adaptive"],
+  "modes": ["baseline", "attacked", "protected", "honest_protected"],
+  "confirmations": 6,
+  "max_blocks": 300,
+  "duration_ticks": 100000,
+  "note": "Prospective engineering protocol, not optimized calibration. Full evaluation is prepared only unless explicitly run. Separate from historical M5."
+}

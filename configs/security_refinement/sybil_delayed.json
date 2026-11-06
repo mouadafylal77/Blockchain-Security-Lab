@@ -1,0 +1,87 @@
+{
+  "scenario": "sybil_delayed_public_bootstrap",
+  "seed": 42,
+  "duration_ticks": 3000,
+  "max_events": 100000,
+  "max_blocks": 20,
+  "max_pending_events": 100000,
+  "difficulty": 1,
+  "mining_attempts": 1000000,
+  "mean_block_ticks": 100,
+  "nodes": [
+    {
+      "id": "alice",
+      "hash_power": 60
+    },
+    {
+      "id": "bob",
+      "hash_power": 40
+    },
+    {
+      "id": "observer",
+      "hash_power": 0
+    },
+    {
+      "id": "sybil1",
+      "hash_power": 0,
+      "peer_group": "network-c"
+    },
+    {
+      "id": "sybil2",
+      "hash_power": 0,
+      "peer_group": "network-c"
+    }
+  ],
+  "links": [
+    {
+      "from": "alice",
+      "to": "bob",
+      "latency_ticks": 5,
+      "jitter_ticks": 2
+    },
+    {
+      "from": "bob",
+      "to": "observer",
+      "latency_ticks": 5,
+      "jitter_ticks": 2
+    },
+    {
+      "from": "alice",
+      "to": "sybil1",
+      "latency_ticks": 2,
+      "jitter_ticks": 0
+    },
+    {
+      "from": "bob",
+      "to": "sybil2",
+      "latency_ticks": 2,
+      "jitter_ticks": 0
+    }
+  ],
+  "attack": {
+    "type": "sybil",
+    "adversary": 0,
+    "target": 2,
+    "confirmations": 2,
+    "sybil_identities": [
+      3,
+      4
+    ],
+    "enabled": true
+  },
+  "security": {
+    "mode": "protected",
+    "detector": "fixed",
+    "window_ticks": 2000,
+    "audit_ticks": 100,
+    "mitigate_confirmations": false,
+    "mitigate_publication": false,
+    "mitigate_pool": false,
+    "mitigate_peers": true,
+    "restrict_bootstrap": true,
+    "bootstrap_peers": [
+      1
+    ],
+    "bootstrap_delay_ticks": 250
+  }
+}

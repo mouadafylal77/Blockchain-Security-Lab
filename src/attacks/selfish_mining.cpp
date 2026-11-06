@@ -29,8 +29,9 @@ bool Attack::selfish_success(const sim::Simulator& sim) const {
     const auto chain = sim.nodes().at(config_.target).chain.active_chain();
     if (chain.size() <= 1) return false;
     std::uint64_t own = 0;
-    for (std::size_t i = 1; i < chain.size(); ++i) if (sim.blocks().at(chain[i]).miner == config_.adversary) ++own;
+    for (std::size_t i = 1; i < chain.size(); ++i) if (controls(sim.blocks().at(chain[i]).miner)) ++own;
     double total = 0; for (const auto& node : sim.nodes()) total += node.hash_power;
-    return publications > 0 && static_cast<double>(own) / (chain.size() - 1) > sim.nodes()[config_.adversary].hash_power / total;
+    double adverse=0;for(std::size_t i=0;i<sim.nodes().size();++i)if(controls(i))adverse+=sim.nodes()[i].hash_power;
+    return publications > 0 && static_cast<double>(own) / (chain.size() - 1) > adverse / total;
 }
 }

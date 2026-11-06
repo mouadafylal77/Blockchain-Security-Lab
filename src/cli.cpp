@@ -3,6 +3,7 @@
 #include "sim/config.hpp"
 #include "sim/simulator.hpp"
 #include "metrics/json_exporter.hpp"
+#include "terminal/interactive.hpp"
 #include <iostream>
 #include <string>
 #include <exception>
@@ -21,10 +22,11 @@ int demo() {
     std::cout << "chain_valid=" << (chain.is_valid() ? "true" : "false") << '\n';
     return chain.is_valid() ? 0 : 1;
 }
-constexpr const char* usage = "Usage: blockchain_sim [--demo|--help] OR --config FILE --output DIRECTORY\n";
+constexpr const char* usage = "Usage: blockchain_sim [--demo|--help|--interactive] OR --config FILE --output DIRECTORY\n";
 }
 int run_cli(int argc, char* argv[]) {
     try {
+        if(argc==2 && std::string(argv[1])=="--interactive")return terminal::interactive(std::cin,std::cout);
         if (argc == 1 || (argc == 2 && std::string(argv[1]) == "--demo")) return demo();
         if (argc == 2 && std::string(argv[1]) == "--help") {
             std::cout << "Blockchain Security Lab\n" << usage;

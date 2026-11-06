@@ -17,18 +17,23 @@ void validate(const Config& c) {
         throw std::invalid_argument("Invalid observation window or sample limits");
     for (const auto x : {c.alpha, c.k, c.clip, c.drift_cap}) if (!std::isfinite(x) || x <= 0) throw std::invalid_argument("Invalid adaptive parameter");
     if (c.alpha > 1 || c.k > 20 || c.clip > 10 || c.drift_cap > 10) throw std::invalid_argument("Adaptive parameter out of range");
-    if (!c.hold_ticks || c.hold_ticks > 1000000000 || !c.publication_delay || c.publication_delay > 1000000000
+    if(c.confirmation_ticks < c.hold_ticks || c.confirmation_ticks > 1000000000) throw std::invalid_argument("Confirmation lifetime must cover payment hold");
+    if(c.bootstrap_delay_ticks>1000000000 || c.bootstrap_peers.size()>256)throw std::invalid_argument("Invalid bootstrap limits");
+    if (c.hold_ticks > 1000000000 || c.max_payment_hold_ticks>1000000000 || !c.publication_delay || c.publication_delay > 1000000000
         || !c.confirmation_increment || c.max_confirmations < c.confirmation_increment || c.max_confirmations > 10000
         || !c.max_peers || c.max_peers > 256 || !c.max_per_group || c.max_per_group > c.max_peers)
         throw std::invalid_argument("Invalid mitigation parameter");
     const Config defaults;
+    if (!c.preventive_confirmations || c.preventive_confirmations>10000 || (c.hardened_security && c.preventive_confirmations > c.max_confirmations) || c.persistent_samples < 2 || c.persistent_samples > 100
+        || !std::isfinite(c.pool_tail_probability) || c.pool_tail_probability <= 0 || c.pool_tail_probability > 0.05)
+        throw std::invalid_argument("Invalid hardened policy parameter");
     if (c.thresholds.size() != defaults.thresholds.size()) throw std::invalid_argument("Incomplete metric thresholds");
     for (const auto& item : c.thresholds) if (!defaults.thresholds.count(item.first) || !std::isfinite(item.second) || item.second <= 0 || item.second > 1e15)
         throw std::invalid_argument("Invalid metric threshold");
 }
 Detector::Detector(Config config, std::map<std::string, Reference> reference) : config_(std::move(config)), reference_(std::move(reference)) {
     validate(config_);
-    for (const auto& item : reference_) if (!config_.thresholds.count(item.first) || item.second.count < config_.min_samples
+    for (const auto& item : reference_) if (!config_.thresholds.count(item.first.substr(item.first.find_last_of('/')==std::string::npos?0:item.first.find_last_of('/')+1)) || item.second.count < config_.min_samples
         || !std::isfinite(item.second.mean) || item.second.mean < 0 || item.second.mean > 1e15
         || !std::isfinite(item.second.variance) || item.second.variance < 0 || item.second.variance > 1e30)
         throw std::invalid_argument("Invalid or insufficient calibration");
@@ -42,7 +47,7 @@ std::vector<Alert> Detector::observe(const std::vector<Feature>& features) {
         last_sample_[key] = f.time;
         ++operations_;
         if (config_.mode == "calibration") {
-            auto& r = calibration_[f.metric];
+            auto& r = calibration_[config_.stratify_reference?key:f.metric];
             const auto previous_count = r.count++;
             const double delta = f.value - r.mean;
             r.mean += delta / static_cast<double>(r.count);
@@ -54,19 +59,26 @@ std::vector<Alert> Detector::observe(const std::vector<Feature>& features) {
         double sigma = 0;
         const double floor = config_.thresholds.at(f.metric) * 0.1;
         if (config_.detector == "adaptive") {
-            if (!reference_.count(f.metric)) { ++insufficient_samples_; continue; }
-            if (!state_.count(key)) state_[key] = reference_.at(f.metric);
+            const auto reference_key=config_.stratify_reference?key:f.metric;
+            if (!reference_.count(reference_key)) { ++insufficient_samples_; continue; }
+            if (!state_.count(key)) state_[key] = reference_.at(reference_key);
             state = &state_.at(key);
             sigma = std::sqrt(std::max(state->variance, floor * floor));
             threshold = std::max(threshold, state->mean + config_.k * sigma);
         }
+        if(f.value > threshold)exceedances_[key]=std::min(config_.persistent_samples,exceedances_[key]+1);
+        else exceedances_[key]=0;
         if (f.value > threshold && (!last_alert_.count(key) || f.time - last_alert_[key] >= config_.cooldown_ticks)) {
             Alert a{f.time, f.node, behavior(f.metric), f.metric, f.component, config_.detector, f.value, threshold};
+            a.evidence_sufficient=f.evidence_sufficient;
+            a.samples=f.samples;
+            a.severity=f.metric=="reorg_depth" && f.value>=2?"critical":
+                (exceedances_[key]>=config_.persistent_samples?"persistent":"informative");
             generated.push_back(a); alerts_.push_back(a); last_alert_[key] = f.time;
         }
         // Score first. Exceedances never train the detector, even during cooldown.
         if (state && f.value <= threshold) {
-            const auto& anchor = reference_.at(f.metric);
+            const auto& anchor = reference_.at(config_.stratify_reference?key:f.metric);
             const double anchor_sigma = std::sqrt(std::max(anchor.variance, floor * floor));
             const double x = std::clamp(f.value, state->mean - config_.clip * sigma, state->mean + config_.clip * sigma);
             const double delta = x - state->mean;

@@ -1,5 +1,6 @@
 #include "metrics/security_export.hpp"
 #include "metrics/detection_evaluation.hpp"
+#include "metrics/security_study.hpp"
 #include "sim/simulator.hpp"
 #include <nlohmann/json.hpp>
 namespace bsl::metrics {
@@ -13,7 +14,9 @@ std::string security_json(const sim::Simulator& sim){
     Json peers=Json::array();for(std::size_t i=0;i<sim.nodes().size();++i){Json ids=Json::array();for(const auto& p:sim.network().peers(i))ids.push_back(sim.nodes()[p.node].id);peers.push_back({{"node",sim.nodes()[i].id},{"peers",ids}});}
     for(const auto& a:sim.detector().alerts())alerts.push_back({{"time",a.time},{"observer",sim.nodes().at(a.node).id},
         {"node_index",a.node},{"component",a.component},{"behavior",a.behavior},{"metric",a.metric},
-        {"value",a.value},{"threshold",a.threshold},{"detector",a.detector}});
+        {"value",a.value},{"threshold",a.threshold},{"detector",a.detector},{"phase",sim.audit_phase(a.time)},
+        {"severity",a.severity},{"evidence_sufficient",a.evidence_sufficient},{"public_samples",a.samples},
+        {"operational",sim.audit_phase(a.time)!="final_observation"}});
     // Evaluation only: ground truth never enters the detector or mitigation policy.
     std::string truth;const auto& attack=sim.config().attack;
     if(attack.enabled){if(attack.type=="51")truth="chain_instability";else if(attack.type=="selfish")truth="publication_anomaly";
@@ -22,7 +25,7 @@ std::string security_json(const sim::Simulator& sim){
     Json latency=nullptr;
     for(const auto& a:sim.detector().alerts())if(a.behavior==truth){latency=a.time;break;}
     const double payment_loss=attack.type=="51"&&sim.attack().success(sim)?1:0;
-    return Json{{"mode",c.mode},{"detector",c.detector},{"alerts",alerts},{"final_peers",peers},{"initial_reference",reference},
+    return Json{{"policy_revision",c.hardened_security?"hardened_m4_v1":"legacy_m4"},{"study",Json::parse(study_json(sim))},{"mode",c.mode},{"detector",c.detector},{"alerts",alerts},{"final_peers",peers},{"initial_reference",reference},
         {"economic",{{"payment_loss_coin_units",payment_loss},{"pool_reward_units",attacks::pool_reward(sim)},
             {"unit_definition","One synthetic coin lost on accepted reversal; one unit per pool block active at target. Counterfactual losses require paired control."}}},
         {"evaluation",{{"unit","run x behavior family; exposure begins at tick 0"},{"ground_truth_family",truth},

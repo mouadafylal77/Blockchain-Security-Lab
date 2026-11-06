@@ -8,6 +8,8 @@ struct Config {
     std::size_t adversary = 0, target = 1;
     unsigned confirmations = 2;
     bool enabled = true;
+    bool public_notice = false; // Legacy oracle retained only for old scenarios.
+    std::vector<std::size_t> adversaries; // Empty means the single legacy adversary.
     std::vector<std::size_t> pool_members;
     std::vector<std::size_t> sybil_identities;
     bool capture_connections = true;
@@ -26,7 +28,9 @@ public:
     bool retain(std::size_t miner, const Block& block);
     void observe(sim::Simulator& sim);
     bool success(const sim::Simulator& sim) const;
-    bool accepted = false, published = false;
+    bool controls(std::size_t node) const;
+    bool accepted = false, published = false, notified = false;
+    unsigned accepted_confirmations = 0, accepted_required = 0;
     std::uint64_t accepted_at = 0;
     std::uint64_t retained = 0, publications = 0;
     std::uint64_t abandoned = 0, max_private_lead = 0;

@@ -14,7 +14,8 @@ int main(int argc,char** argv){try{
         mitigation::Policy p(c);
         p.apply({10,0,"chain_instability","reorg_depth","node","fixed",2,0.5});
         check(!p.payment_allowed(0,11) && p.confirmations(0,2,11)==7,"Alert raises confirmations and gates new settlements");
-        check(p.payment_allowed(0,510) && p.confirmations(0,2,510)==2,"Hold expires");
+        check(p.payment_allowed(0,510) && p.confirmations(0,2,510)==7,"Hold expires but elevated threshold persists");
+        check(p.confirmations(0,2,1010)==2,"Elevated threshold expires independently");
         auto config=sim::load_config(std::string(BSL_SOURCE_DIR)+"/configs/attack_51.json");
         config.nodes[0].hash_power=10;config.nodes[1].hash_power=45;config.nodes[2].hash_power=45;
         config.links={{0,1,40,0},{1,2,40,0},{0,2,40,0}};

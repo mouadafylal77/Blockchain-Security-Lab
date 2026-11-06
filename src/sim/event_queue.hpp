@@ -26,6 +26,8 @@ public:
         now_ = event.time;
         return event;
     }
+    // Cancel obsolete timers without advancing virtual time or consuming RNG.
+    void discard_top() { if(empty())throw std::logic_error("Empty event queue");queue_.pop(); }
     Time now() const { return now_; }
     std::size_t size() const { return queue_.size(); }
 private:

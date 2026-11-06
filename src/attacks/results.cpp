@@ -8,13 +8,13 @@ std::string results_json(const sim::Simulator& sim) {
     const auto& a = sim.attack();
     const auto& c = sim.config().attack;
     Json result{{"type", c.type}, {"enabled", c.enabled}, {"success", a.success(sim)},
-        {"merchant_accepted", a.accepted}, {"merchant_accepted_at",a.accepted_at}, {"retained", a.retained}, {"publications", a.publications},
+        {"merchant_accepted", a.accepted}, {"accepted_confirmations",a.accepted_confirmations},{"accepted_required",a.accepted_required},{"payment_notice_received",a.notified}, {"merchant_accepted_at",a.accepted_at}, {"retained", a.retained}, {"publications", a.publications},
         {"abandoned", a.abandoned}, {"max_private_lead", a.max_private_lead},
         {"private_blocks_at_stop", a.private_blocks}, {"filtered_messages", a.filtered_messages}};
     if (c.type != "none") {
         const auto active = sim.nodes().at(c.target).chain.active_chain();
         std::uint64_t own = 0;
-        for (std::size_t i = 1; i < active.size(); ++i) if (sim.blocks().at(active[i]).miner == c.adversary) ++own;
+        for (std::size_t i = 1; i < active.size(); ++i) if (a.controls(sim.blocks().at(active[i]).miner)) ++own;
         result["adversary_active_blocks_at_target"] = own;
         result["active_block_share_at_target"] = active.size() > 1 ? static_cast<double>(own) / (active.size() - 1) : 0;
         result["effective_links"] = Json::parse(sim::config_json(network_config(sim.config()))).at("links");

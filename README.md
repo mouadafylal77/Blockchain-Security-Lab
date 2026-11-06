@@ -1,6 +1,6 @@
 # Blockchain Security Lab
 
-État : **M4**, détection statistique et défenses intégrées au simulateur PoW multi-nœuds à événements discrets, avec noyau M1
+État : **0.6.0 — terminal PoW et M4 instrumenté**, détection statistique et défenses intégrées au simulateur PoW multi-nœuds à événements discrets, avec noyau M1
 conservé. Configurations JSON, topologie, latences, minage probabiliste,
 arbres locaux, forks, travail cumulé et traces de réorganisation sont exécutables.
 `exo4.cpp` reste le code de référence Atelier 1, sans modification et hors compilation.
@@ -98,8 +98,7 @@ variations de calcul flottant entre plateformes ne sont pas garanties identiques
 Voir [le modèle du noyau](docs/SIMULATION_MODEL.md) et
 [l'audit et le journal](docs/DEVELOPMENT_LOG.md). Réseau abstrait fiable, topologie
 fixe et difficulté commune fixe : ni bande passante, ni pertes, ni transactions
-financières réelles. Les campagnes statistiques M5,
-PoS, backend et frontend sont différés.
+financières réelles. M5 reste la référence historique gelée. Le laboratoire est PoW uniquement ; aucun PoS distribué, backend ou frontend n’est prévu.
 
 ## M3 : exécuter les attaques
 
@@ -116,7 +115,7 @@ l'objet `attack`, les paramètres, compteurs de rétention/publication, résulta
 locaux et, pour la pool, shares, solutions complètes et payouts. Le modèle
 scientifique détaille précisément les objectifs de succès et les simplifications.
 Une seed favorable n'est pas une estimation d'efficacité ou de rentabilité.
-Les attaques ne sont pas combinées. PoS, backend et frontend restent différés ; le ML est exclu.
+Les attaques ne sont pas combinées. PoS distribué, backend, frontend et ML sont exclus par décision du propriétaire.
 
 ## M4 : détection statistique et mitigation
 
@@ -148,4 +147,93 @@ PoW par travail cumulé est conservé. Une alerte n'identifie pas avec certitude
 attaque. La protection 51 % peut arriver après le paiement ; une pool ne récupère
 pas ses solutions retenues ; une probation peut pénaliser un relais honnête.
 Les exemples conservent leurs faux positifs et ne démontrent aucun taux général
-sur plusieurs seeds. M5, Python, PoS et web restent différés.
+sur plusieurs seeds. M5 a livré sa campagne historique ; les extensions courantes restent en C++ PoW sans web ni ML.
+
+
+## Terminal interactif — version 0.5.0
+
+```powershell
+./build/ucrt64/blockchain_sim.exe --interactive
+```
+
+Mode simple : six paramètres seulement (nœuds, mineurs, hauteur, attaque, puissance adverse si pertinente, sécurité). Récapitulatif court puis lancement. Pendant le calcul : uniquement « Simulation en cours... ». Résultat en langage simple, verdict d’attaque, défense évaluable seulement selon un critère déclaré, et deux ou trois indicateurs utiles. Le menu « Comparer » exécute les deux variantes dans l’application, puis reste ouvert. Aucun détail technique dans ce parcours ; [critères et exports](docs/TERMINAL_SIMPLE.md).
+
+Mode personnalisé : seed, poids individuels (zéro permis), rôles malveillants coordonnés, cible, topologie anneau/complète/ligne/manuelle, latences/jitter par lien manuel, confirmations marchandes, membres du pool ou identités Sybil/capture, difficulté, limites, détection fixe/adaptative et paramètres de politique utiles au scénario. Les groupes administratifs Sybil sont configurables mais supposés observables et fiables. `b`/`retour` revient à la question précédente, `q`/`annuler` quitte, Entrée garde la valeur proposée. `?`/`aide` montre la proposition et les bornes sans encombrer chaque question. Le récapitulatif avant lancement permet de choisir directement le numéro d’un paramètre à corriger. La stratégie de publication/retenue reste celle de M3 ; aucune stratégie arbitraire programmable n’est promise.
+
+Les mineurs malveillants utilisent leurs propres poids ; le groupe n’ajoute aucun mineur virtuel. Ils partagent instantanément leur état privé dans ce modèle de coalition. Le terminal affiche blocs/parents, réceptions, forks, branches retenues `[PRIVE]`, publications, réorganisations, alertes et actions. Cette vue pédagogique n’alimente jamais les détecteurs. Aucune attente réelle n’influence le temps virtuel.
+
+Chaque expérience crée un répertoire neuf `results/raw/interactive/run_N/`, avec `config.json` et `results.json`. Le menu permet une nouvelle expérience, un rejeu, ou une comparaison avec les défenses inversées. Les configurations sont rejouables par la CLI historique `--config FILE --output DIRECTORY`. Aucun JSON manuel n’est requis dans le terminal. La détection adaptative lance d’abord une calibration honnête séparée (seed dérivée et affichée), exporte sa référence et refuse une référence sans échantillons utilisables. Les caractéristiques insuffisamment calibrées sont ignorées et comptées, jamais inventées. Les chemins de référence diffèrent entre répertoires ; les observations simulées sont reproductibles, et le rejeu du JSON sauvegardé est identique pour la même construction.
+
+`target_height` (0 = comportement historique) désigne la première hauteur atteinte chez `observer`. En 0.5.1, la production continue pendant `post_target_ticks` (0 = fermeture immédiate), puis les messages en file sont traités sous limites ; une réorganisation peut encore changer la hauteur finale. `max_blocks` reste le plafond global de découvertes, privées comprises. Une hauteur souhaitée n’est pas une garantie de progression.
+
+Le résultat distingue `success`, `failed`, `inconclusive`, `baseline`. Une branche privée encore en attente, un paiement jamais accepté ou une limite temporelle/événementielle peut rendre l’issue non concluante. Zéro paiement accepté n’est jamais présenté comme une protection réussie. Le succès économique 51 % reste le renversement réel d’un paiement accepté, dans la vue finale du marchand. Ces résultats restent des observations finies du modèle.
+
+## Politique marchande révisée
+
+`security.hold_ticks` suspend les nouvelles acceptations. `confirmation_ticks` (défaut 1000, au moins hold_ticks) conserve indépendamment le seuil renforcé ; après la suspension le marchand peut réellement accepter sous ce seuil. L’augmentation vaut profondeur arrondie + confirmation_increment, plafonnée sans abaisser la règle initiale. Des alertes répétées renouvellent les durées ; des paiements honnêtes peuvent donc être retardés ou rester refusés. Les tests couvrent ces coûts.
+
+`event_audits` déclenche des audits sur les forks/réorganisations publics locaux, sans accès aux blocs privés. `proactive_signals` (défaut false) autorise aussi les alertes de fréquence de forks/silence à modifier la politique : elles ne prouvent pas une attaque. Les audits périodiques restent configurables. Une réaction après acceptation ne sauve pas le paiement passé ; aucune garantie contre une majorité de hash power n’est donnée. Le consensus et les trois autres mitigations restent inchangés.
+
+Les nouveaux scénarios fixent `attack.public_notice=true` : l’acceptation marchande est annoncée par messages P2P avec latence, puis l’adversaire compare sa chaîne privée à sa propre vue publique. Les anciens JSON sans ce champ gardent l’oracle M3 explicitement documenté. Le changement d’observation n’est pas une nouvelle stratégie destinée à favoriser la défense.
+
+Schéma de résultats 2, modèle `pow_terminal_v2` : séquence de l’événement, détail des traces, confirmations observées/requises à l’acceptation, notification publique et issue explicite. Les résultats M5 restent au schéma 1 / moteur 0.4.0.
+
+## Préservation M5 et validation séparée
+
+```powershell
+./scripts/preserve-m5.ps1
+./scripts/test-ucrt64.ps1
+./scripts/run-validation.ps1                  # prépare seulement
+./scripts/run-validation.ps1 -Smoke -Run      # huit vérifications, pas une estimation statistique
+```
+
+L’archive locale ignorée `build/m5-reference/` conserve sources gelées, binaire et DLL ; ne pas la supprimer comme un build jetable. Le vérificateur historique M5 s’attache à cet arbre gelé ; il échouera normalement sur l’arbre courant modifié. Les écritures du moteur vers les espaces `m5_30seeds` et `m5-reference` sont refusées. Les rapports/configurations/manifeste/données M5 n’ont pas été remplacés. L’archive locale n’est pas une sauvegarde distante.
+
+La nouvelle évaluation est décrite dans `analysis/POW_VALIDATION_V2_PROTOCOL.md`. Elle prépare 1680 évaluations et sept calibrations distinctes ; aucune campagne complète nouvelle n’est annoncée comme réalisée. `-Run` l’exécuterait séquentiellement dans un nouvel espace `pow_validation_v2`, sans toucher à M5. Les seeds 2001..2030 sont distinctes de M5 ; le quatrième mode honnête protégé mesure les fausses sanctions.
+
+L’énoncé académique mentionne PoW/PoS. Le périmètre PoW uniquement est une décision explicite du propriétaire ; `exo4.cpp` reste la démonstration PoW/PoS d’Atelier 1, hors du laboratoire distribué. Aucun PoS distribué n’est revendiqué.
+
+
+## Lisibilité et arrêt — 0.5.1
+
+L’affichage synthétique est proposé par défaut : découvertes/producteurs, premiers forks/alertes et actions regroupés, publications privées, réorganisations et paiement accepté/renversé. Les occurrences répétées et les réceptions/envois P2P restent dans l’export complet. Choisir l’affichage détaillé pendant la configuration pour voir hashes, ticks, séquences, envois/réceptions et observations locales. Les deux affichages produisent des résultats JSON identiques pour une même configuration : le renderer ne lit que le moteur.
+
+`post_target_ticks` continue la production normale après la première hauteur cible, pendant une durée définie avant le lancement. Le terminal propose 20 intervalles moyens, modifiables (0 = arrêt à la cible). Les plafonds de temps/découvertes/événements restent prioritaires. Aucune branche privée n’est publiée de force. L’issue et le motif d’arrêt/limite sont affichés séparément ; une réussite déjà observée peut coexister avec un plafond atteint. Une branche privée encore ouverte reste non concluante si l’objectif n’est pas atteint.
+
+Les minuteries devenues inactives sont annulées sans faire avancer l’horloge. Les alertes exportent `phase` (production, drain, final_observation) et `operational` ; ce dernier indique si l’audit peut appliquer une action selon la configuration, pas si chaque alerte a effectivement déclenché une mitigation. Les alertes finales restent conservées, sans action. Les seuils des détecteurs et les trois autres mitigations ne sont pas modifiés.
+
+Essais ciblés reproductibles, sans M5 :
+
+```powershell
+./scripts/test-ucrt64.ps1
+./scripts/check-terminal.ps1
+```
+
+Le second script crée un espace neuf sous `results/raw/terminal_review/` et exécute 14 sessions CLI : quatre attaques sans/avec défense, quatre configurations personnalisées et deux contrôles à 85 %. Il enregistre saisies, stdout, chemins et empreintes des résultats. Ce n’est pas une campagne statistique. Voir [le rapport des essais et le diagnostic des 202 alertes](analysis/TERMINAL_REVIEW_051.md).
+
+
+## Raffinement scientifique M4 — 0.6.0
+
+Les stratégies M3 et les seuils fixes historiques sont conservés. Les nouvelles options sont explicites, sans activation automatique dans les anciens JSON :
+
+- `security.max_payment_hold_ticks` : plafond de suspension pendant un épisode de risque (0 = renouvellement historique illimité). Les confirmations renforcées persistent indépendamment. Un plafond peut améliorer l’acceptation honnête et augmenter le risque adverse : aucun gain garanti.
+- `stratify_reference` : moments honnêtes par nœud/composant/métrique ; `strict_reference` : exiger une référence liée au profil réseau. Les nouveaux exports de calibration portent le profil SHA-256 et la source honnête ; les références historiques restent lisibles en mode non strict. Strates absentes : abstention comptée, pas valeur inventée.
+- `restrict_bootstrap` et `bootstrap_peers` : restreindre les nouveaux candidats publics ; `bootstrap_delay_ticks` : délai effectif avant connexion (défaut0). Aucun lien n’est activé à l’avance ; l’absence de candidat indépendant peut empêcher toute récupération.
+
+`results.json.security.study` contient les décisions publiques marchandes (éligibilité, confirmations, suspension, séquence), les coûts de probation par émetteur et producteur, les crédits/payouts de pool, les tentatives de connexion et la première adoption observée. Les étiquettes honnête/adverse servent uniquement à l’évaluation après simulation. Une occasion de base sur la trajectoire protégée n’est pas un contre-factuel sans défense ; utiliser les contrôles appariés.
+
+Exemples optionnels (répertoires neufs recommandés ; la CLI historique peut remplacer un résultat hors M5) :
+
+```powershell
+./build/ucrt64/blockchain_sim.exe --config configs/security_refinement/network_calibration.json --output results/raw/security_refinement/network
+./build/ucrt64/blockchain_sim.exe --config configs/security_refinement/network_validation.json --output results/raw/security_refinement/network_validation
+./build/ucrt64/blockchain_sim.exe --config configs/security_refinement/sybil_restricted.json --output results/raw/security_refinement/sybil_restricted
+```
+
+Résultats, coûts et limites : [rapport M4](analysis/M4_REFINEMENT_REPORT.md). Hypothèses écrites avant implémentation : [plan des lots](docs/SECURITY_REFINEMENT_PLAN.md). [Proposition de benchmark indépendant](analysis/M4_INDEPENDENT_BENCHMARK_PROPOSAL.md) **non lancée, soumise à validation**. La référence M5 et ses résultats restent préservés.
+
+
+Renforcement optionnel M4 : `security.hardened_security=true`, exemples reproductibles sous `configs/final_defenses/`. Confirmations préventives, probation par producteur public, séquestre de shares restituable et diversité P2P préventive. Les anciens JSON et le terminal conservent leur politique précédente. Hypothèses et limites : `docs/FINAL_DEFENSE_PROTOCOL.md` et section `hardened_m4_v1` de `docs/SIMULATION_MODEL.md`. Les résultats ciblés sont documentés dans `docs/FINAL_DEFENSE_RESULTS.md` ; M5 reste inchangé.
+
+
+Démonstration du terminal simple mis à jour : depuis la racine, `./build/ucrt64/final-bin/blockchain_sim.exe --interactive`. Ce binaire a été recompilé et exécuté ; l'ancien chemin build/ucrt64/blockchain_sim.exe n'est pas celui de cette démonstration. Fixe/adaptatif activent automatiquement hardened_security en simple, aucune défense le désactive. Comparer utilise false/true avec la même seed et des références honnêtes adaptées à chaque extracteur en mode adaptatif. Mode personnalisé inchangé.

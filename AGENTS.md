@@ -1,7 +1,7 @@
 # AGENTS.md — Blockchain Security Lab
 
 ## Mission
-Develop **Blockchain Security Lab (Atelier 2)**, an academic, reproducible blockchain security simulation platform. The immediate priority is a **working, tested C++17 simulation engine**. Do not implement the web backend or frontend during the engine phase.
+Develop **Blockchain Security Lab**, an academic, reproducible blockchain security simulation platform. Owner decision: PoW only in the four-attack laboratory, with a C++17 interactive terminal (simple/custom). No distributed PoS, web or Machine Learning. Disclose the PoW/PoS wording of the academic assignment; preserve its isolated Atelier 1 demonstration.
 
 ## Source of truth and project context
 Read the files relevant to the task, in this order of authority:
@@ -18,7 +18,7 @@ If `projet.md` is missing or incomplete, state precisely which requirements cann
 - Automated C++ tests via **CTest** (a lightweight test framework is optional).
 - Read simulation configuration from **JSON**; export results as **CSV and/or JSON**, with a documented schema.
 - Use a seeded random number generator, simulated time, and deterministic tie-breaking for reproducibility.
-- Python is for **later experimental analysis**; planned backend: **FastAPI**; planned frontend: **HTML/CSS/JavaScript** in a **Retro Web 1998** style.
+- Python is optional experimental analysis only. JSON supports replay/export; the terminal generates validated scenarios without manual JSON editing.
 - Never require Python, FastAPI, or a frontend to build or execute the C++ engine.
 - Avoid unnecessary heavyweight dependencies and build artifacts; do not commit generated binaries, large results, or local environment files.
 
@@ -61,7 +61,12 @@ Design the C++ engine as a standalone CLI, targeting a command similar to:
 ./blockchain_sim --config configs/baseline.json --output results/raw/run_001
 ```
 
-The exact executable name and arguments must be finalized in implementation and documented in `README.md`. Errors should return a nonzero exit status. Outputs should identify the scenario, seed, parameters and relevant measurement definitions so a future FastAPI service can invoke the binary without rewriting simulation logic.
+The exact executable name and arguments must be finalized in implementation and documented in `README.md`. Errors should return a nonzero exit status. Outputs should identify the scenario, seed, parameters and relevant measurement definitions for replay by the standalone C++ terminal.
 
 ## Priority and constraints
-Finish the **C++ engine and its tests first**, then experimental analysis, then backend/frontend. Keep local builds lightweight and incremental: the development machine has limited RAM and disk space. Favor clear, explainable code over premature features, machine learning, dashboards, Docker or report automation.
+Finish the **C++ engine and its tests first**, then experimental analysis, then the academic report. Keep local builds lightweight and incremental: the development machine has limited RAM and disk space. Favor clear, explainable code over premature features, machine learning, dashboards, Docker or report automation.
+
+## Revised development contract (owner decision)
+Before changing frozen inputs or rebuilding, run `scripts/preserve-m5.ps1 -Create`; verify with the same script without -Create. Preserve the local ignored archive `build/m5-reference` and all historical M5 data, configurations, analysis and manifests. Never rerun the original 720 cases to replace results. New evaluations use separate paths/model versions. Keep historical JSON compatibility.
+
+Add `--interactive` with simple/custom modes, back/cancel and contextual inputs. Resource totals are sums of actual miners, never extra virtual hash power. Pedagogical private displays must not feed detectors/honest nodes. Distinguish failed, successful and inconclusive attacks; payment refusal is not successful protection. Separate merchant hold and strengthened-confirmation durations. Use public signals only. Keep builds at two tasks maximum. No commits/pushes without authorization.

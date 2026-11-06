@@ -1,0 +1,88 @@
+{
+  "scenario": "pow_terminal_51_v2",
+  "seed": 2001,
+  "duration_ticks": 100000,
+  "max_events": 100000,
+  "max_blocks": 400,
+  "max_pending_events": 100000,
+  "difficulty": 1,
+  "mining_attempts": 1000000,
+  "mean_block_ticks": 100,
+  "nodes": [
+    {
+      "id": "adversary",
+      "hash_power": 30,
+      "peer_group": "a"
+    },
+    {
+      "id": "honest1",
+      "hash_power": 35,
+      "peer_group": "b"
+    },
+    {
+      "id": "honest2",
+      "hash_power": 35,
+      "peer_group": "c"
+    },
+    {
+      "id": "merchant",
+      "hash_power": 0,
+      "peer_group": "d"
+    }
+  ],
+  "links": [
+    {
+      "from": "adversary",
+      "to": "honest1",
+      "latency_ticks": 5,
+      "jitter_ticks": 2
+    },
+    {
+      "from": "honest1",
+      "to": "honest2",
+      "latency_ticks": 5,
+      "jitter_ticks": 2
+    },
+    {
+      "from": "honest2",
+      "to": "merchant",
+      "latency_ticks": 5,
+      "jitter_ticks": 2
+    },
+    {
+      "from": "merchant",
+      "to": "adversary",
+      "latency_ticks": 5,
+      "jitter_ticks": 2
+    }
+  ],
+  "attack": {
+    "type": "51",
+    "adversary": 0,
+    "target": 3,
+    "confirmations": 2,
+    "enabled": true,
+    "adversaries": [
+      0
+    ],
+    "public_notice": true
+  },
+  "target_height": 20,
+  "observer": 3,
+  "security": {
+    "mode": "protected",
+    "detector": "fixed",
+    "audit_ticks": 10,
+    "window_ticks": 2000,
+    "hold_ticks": 200,
+    "confirmation_ticks": 2000,
+    "confirmation_increment": 3,
+    "max_confirmations": 100,
+    "event_audits": true,
+    "proactive_signals": false,
+    "mitigate_confirmations": true,
+    "mitigate_publication": false,
+    "mitigate_pool": false,
+    "mitigate_peers": false
+  }
+}

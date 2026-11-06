@@ -28,9 +28,13 @@ double number(const Json& value) {
 }
 }
 void validate_config(const Config& c) {
+    std::set<std::size_t> bootstrap;
+    for(const auto peer:c.security.bootstrap_peers)if(peer>=c.nodes.size() || !bootstrap.insert(peer).second)throw std::invalid_argument("Invalid or duplicate public bootstrap candidate");
+    if(c.post_target_ticks>1000000000)throw std::invalid_argument("Invalid post_target_ticks");
     attacks::validate(c);
     detection::validate(c.security);
     if((c.security.mode=="baseline" || c.security.mode=="calibration") && c.attack.type!="none" && c.attack.enabled) throw std::invalid_argument("Calibration baseline must be honest");
+    if (c.target_height > 10000 || c.observer >= c.nodes.size()) throw std::invalid_argument("Invalid target height/observer");
     if (c.scenario.empty() || c.scenario.size() > 128) throw std::invalid_argument("Invalid scenario name");
     if (!c.duration_ticks || c.duration_ticks > 1000000000000ULL) throw std::invalid_argument("Invalid duration_ticks");
     if (!c.max_events || c.max_events > 1000000 || !c.max_blocks || c.max_blocks > 10000
@@ -74,8 +78,11 @@ Config parse_config(const std::string& text) {
         return true;
     });
     fields(json, {"scenario", "seed", "duration_ticks", "max_events", "max_blocks", "max_pending_events",
-        "difficulty", "mining_attempts", "mean_block_ticks", "nodes", "links", "attack", "security"});
+        "difficulty", "mining_attempts", "mean_block_ticks", "nodes", "links", "attack", "security", "target_height", "observer", "post_target_ticks"});
     Config c;
+    if(json.contains("post_target_ticks"))c.post_target_ticks=integer(json.at("post_target_ticks"));
+    if(json.contains("target_height")) c.target_height=integer(json.at("target_height"));
+    if(json.contains("observer")) c.observer=integer(json.at("observer"));
     if(json.contains("security")) c.security=detection::parse_config(json.at("security").dump());
     if (json.contains("attack")) c.attack = attacks::parse_config(json.at("attack").dump());
     c.scenario = json.at("scenario").get<std::string>();
@@ -120,7 +127,7 @@ std::string config_json(const Config& c) {
     for (const auto& n : c.nodes) nodes.push_back({{"id", n.id}, {"hash_power", n.hash_power}, {"peer_group",n.peer_group}});
     for (const auto& l : c.links) links.push_back({{"from", c.nodes.at(l.from).id}, {"to", c.nodes.at(l.to).id},
         {"latency_ticks", l.latency}, {"jitter_ticks", l.jitter}});
-    return Json{{"security",Json::parse(detection::config_json(c.security))},{"attack", Json::parse(attacks::config_json(c.attack))}, {"scenario", c.scenario}, {"seed", c.seed}, {"duration_ticks", c.duration_ticks},
+    return Json{{"post_target_ticks",c.post_target_ticks},{"target_height",c.target_height},{"observer",c.observer},{"security",Json::parse(detection::config_json(c.security))},{"attack", Json::parse(attacks::config_json(c.attack))}, {"scenario", c.scenario}, {"seed", c.seed}, {"duration_ticks", c.duration_ticks},
         {"max_events", c.max_events}, {"max_blocks", c.max_blocks}, {"max_pending_events", c.max_pending_events},
         {"difficulty", c.difficulty}, {"mining_attempts", c.mining_attempts}, {"mean_block_ticks", c.mean_block_ticks},
         {"nodes", nodes}, {"links", links}}.dump();

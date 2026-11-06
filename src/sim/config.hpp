@@ -13,6 +13,9 @@ struct Config {
     std::string scenario = "baseline";
     std::uint64_t seed = 42;
     Time duration_ticks = 1000;
+    std::uint64_t target_height = 0; // 0 keeps legacy discovery-limit stopping.
+    Time post_target_ticks = 0; // Continue normal production for this bounded observation window.
+    std::size_t observer = 0;
     std::uint64_t max_events = 100000, max_blocks = 1000, max_pending_events = 100000;
     unsigned difficulty = 1;
     std::uint64_t mining_attempts = 1000000;

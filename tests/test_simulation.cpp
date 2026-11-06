@@ -265,7 +265,7 @@ void limits() {
 void metrics_test() {
     Simulator s(small_config()); s.run();
     const auto j = Json::parse(metrics::results_json(s));
-    require(j.at("schema_version") == 1 && j.at("config").at("seed") == 42, "Structured metadata");
+    require(j.at("schema_version") == 2 && j.at("config").at("seed") == 42, "Structured metadata");
     require(j.at("nodes")[0].at("blocks_mined") == 3 && j.at("nodes")[1].at("blocks_mined") == 0, "Origin distribution");
     require(j.at("metrics").at("propagation_mean_ticks") == 10.5, "Propagation mean definition");
     require(s.metrics().forks == 0 && s.metrics().reorganizations == 0, "Single miner baseline has no forks");

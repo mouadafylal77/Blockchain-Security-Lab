@@ -12,8 +12,11 @@ bool contains_spend(const sim::Simulator& sim, const Block& tip, const std::stri
     return false;
 }
 }
+bool Attack::controls(std::size_t node) const {
+    return config_.adversaries.empty()?node==config_.adversary:std::find(config_.adversaries.begin(),config_.adversaries.end(),node)!=config_.adversaries.end();
+}
 const Block& Attack::parent(const sim::Simulator& sim, std::size_t miner) const {
-    if (config_.enabled && ((config_.type == "51" && !published) || config_.type == "selfish") && miner == config_.adversary) {
+    if (config_.enabled && ((config_.type == "51" && !published) || config_.type == "selfish") && controls(miner)) {
         if (!private_blocks.empty()) return sim.blocks().at(private_blocks.back()).block;
         if (config_.type == "51") { static const Block genesis = genesis_block(); return genesis; }
     }
@@ -23,12 +26,12 @@ void Attack::transactions(const sim::Simulator& sim, std::size_t miner, Block& b
     if (config_.type != "51") return;
     const auto& p = parent(sim, miner);
     if (!contains_spend(sim, p, "spend:coin:merchant") && !contains_spend(sim, p, "spend:coin:attacker"))
-        b.transactions.push_back(config_.enabled && miner == config_.adversary && !published ? "spend:coin:attacker" : "spend:coin:merchant");
+        b.transactions.push_back(config_.enabled && controls(miner) && !published ? "spend:coin:attacker" : "spend:coin:merchant");
 }
 bool Attack::retain(std::size_t miner, const Block& block) {
     if (!config_.enabled) return false;
-    if (config_.type == "withholding" && miner == config_.adversary) { ++retained; return true; }
-    if ((config_.type != "51" && config_.type != "selfish") || miner != config_.adversary || (config_.type == "51" && published)) return false;
+    if (config_.type == "withholding" && controls(miner)) { ++retained; return true; }
+    if ((config_.type != "51" && config_.type != "selfish") || !controls(miner) || (config_.type == "51" && published)) return false;
     private_blocks.push_back(block.hash); ++retained;
     return true;
 }
@@ -41,12 +44,19 @@ void Attack::observe(sim::Simulator& sim) {
         const auto& b = chain.at(hash);
         if (std::find(b.transactions.begin(), b.transactions.end(), "spend:coin:merchant") != b.transactions.end()
             && chain.tip().index - b.index + 1 >= sim.required_confirmations(config_.target,config_.confirmations)
-            && sim.payment_allowed(config_.target)) { accepted = true; accepted_at = sim.now(); }
+            && sim.payment_allowed(config_.target)) {
+                accepted = true; accepted_at = sim.now();
+                accepted_confirmations=static_cast<unsigned>(chain.tip().index-b.index+1);
+                accepted_required=sim.required_confirmations(config_.target,config_.confirmations);
+                sim.record_payment(accepted_confirmations,accepted_required);
+                if(config_.public_notice) sim.announce_payment(config_.target);
+            }
     }
-    if (config_.enabled && !published && accepted && !private_blocks.empty()) {
+    if (config_.enabled && !published && (config_.public_notice?notified:accepted) && !private_blocks.empty()) {
         std::uint64_t private_work = 0;
         for (const auto& hash : private_blocks) private_work += block_work(sim.blocks().at(hash).block.difficulty);
-        if (private_work > chain.cumulative_work(chain.tip().hash)) {
+        const auto& observed=config_.public_notice?sim.nodes().at(config_.adversary).chain:chain;
+        if (private_work > observed.cumulative_work(observed.tip().hash)) {
             published = true;
             for (const auto& hash : private_blocks) { sim.publish(config_.adversary, hash); ++publications; }
             private_blocks.clear();

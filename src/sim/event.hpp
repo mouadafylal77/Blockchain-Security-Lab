@@ -4,7 +4,7 @@
 #include <string>
 namespace bsl::sim {
 using Time = std::uint64_t;
-enum class EventType { mine, deliver, share, security_audit, held_delivery };
+enum class EventType { mine, deliver, share, security_audit, held_delivery, payment_notice, close_production, peer_reconnect };
 struct Event {
     Time time = 0;
     std::uint64_t sequence = 0; // Assigned only by EventQueue.

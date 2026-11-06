@@ -1,0 +1,405 @@
+{
+  "attack": {
+    "adversaries": [
+      0
+    ],
+    "adversary": 0,
+    "capture_connections": true,
+    "confirmations": 2,
+    "enabled": false,
+    "pool_members": [],
+    "public_notice": true,
+    "sybil_identities": [],
+    "target": 29,
+    "type": "51"
+  },
+  "difficulty": 1,
+  "duration_ticks": 20000,
+  "links": [
+    {
+      "from": "node0",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node1"
+    },
+    {
+      "from": "node1",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node2"
+    },
+    {
+      "from": "node2",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node3"
+    },
+    {
+      "from": "node3",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node4"
+    },
+    {
+      "from": "node4",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node5"
+    },
+    {
+      "from": "node5",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node6"
+    },
+    {
+      "from": "node6",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node7"
+    },
+    {
+      "from": "node7",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node8"
+    },
+    {
+      "from": "node8",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node9"
+    },
+    {
+      "from": "node9",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node10"
+    },
+    {
+      "from": "node10",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node11"
+    },
+    {
+      "from": "node11",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node12"
+    },
+    {
+      "from": "node12",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node13"
+    },
+    {
+      "from": "node13",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node14"
+    },
+    {
+      "from": "node14",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node15"
+    },
+    {
+      "from": "node15",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node16"
+    },
+    {
+      "from": "node16",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node17"
+    },
+    {
+      "from": "node17",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node18"
+    },
+    {
+      "from": "node18",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node19"
+    },
+    {
+      "from": "node19",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node20"
+    },
+    {
+      "from": "node20",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node21"
+    },
+    {
+      "from": "node21",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node22"
+    },
+    {
+      "from": "node22",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node23"
+    },
+    {
+      "from": "node23",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node24"
+    },
+    {
+      "from": "node24",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node25"
+    },
+    {
+      "from": "node25",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node26"
+    },
+    {
+      "from": "node26",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node27"
+    },
+    {
+      "from": "node27",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node28"
+    },
+    {
+      "from": "node28",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node29"
+    },
+    {
+      "from": "node0",
+      "jitter_ticks": 2,
+      "latency_ticks": 5,
+      "to": "node29"
+    }
+  ],
+  "max_blocks": 80,
+  "max_events": 100000,
+  "max_pending_events": 100000,
+  "mean_block_ticks": 100.0,
+  "mining_attempts": 1000000,
+  "nodes": [
+    {
+      "hash_power": 40.0,
+      "id": "node0",
+      "peer_group": "group0"
+    },
+    {
+      "hash_power": 8.922413793103448,
+      "id": "node1",
+      "peer_group": "group1"
+    },
+    {
+      "hash_power": 8.405172413793103,
+      "id": "node2",
+      "peer_group": "group2"
+    },
+    {
+      "hash_power": 7.241379310344827,
+      "id": "node3",
+      "peer_group": "group3"
+    },
+    {
+      "hash_power": 1.293103448275862,
+      "id": "node4",
+      "peer_group": "group4"
+    },
+    {
+      "hash_power": 10.732758620689655,
+      "id": "node5",
+      "peer_group": "group5"
+    },
+    {
+      "hash_power": 1.4224137931034482,
+      "id": "node6",
+      "peer_group": "group6"
+    },
+    {
+      "hash_power": 11.89655172413793,
+      "id": "node7",
+      "peer_group": "group7"
+    },
+    {
+      "hash_power": 6.594827586206897,
+      "id": "node8",
+      "peer_group": "group8"
+    },
+    {
+      "hash_power": 3.4913793103448274,
+      "id": "node9",
+      "peer_group": "group9"
+    },
+    {
+      "hash_power": 0.0,
+      "id": "node10",
+      "peer_group": "group10"
+    },
+    {
+      "hash_power": 0.0,
+      "id": "node11",
+      "peer_group": "group11"
+    },
+    {
+      "hash_power": 0.0,
+      "id": "node12",
+      "peer_group": "group12"
+    },
+    {
+      "hash_power": 0.0,
+      "id": "node13",
+      "peer_group": "group13"
+    },
+    {
+      "hash_power": 0.0,
+      "id": "node14",
+      "peer_group": "group14"
+    },
+    {
+      "hash_power": 0.0,
+      "id": "node15",
+      "peer_group": "group15"
+    },
+    {
+      "hash_power": 0.0,
+      "id": "node16",
+      "peer_group": "group16"
+    },
+    {
+      "hash_power": 0.0,
+      "id": "node17",
+      "peer_group": "group17"
+    },
+    {
+      "hash_power": 0.0,
+      "id": "node18",
+      "peer_group": "group18"
+    },
+    {
+      "hash_power": 0.0,
+      "id": "node19",
+      "peer_group": "group19"
+    },
+    {
+      "hash_power": 0.0,
+      "id": "node20",
+      "peer_group": "group20"
+    },
+    {
+      "hash_power": 0.0,
+      "id": "node21",
+      "peer_group": "group21"
+    },
+    {
+      "hash_power": 0.0,
+      "id": "node22",
+      "peer_group": "group22"
+    },
+    {
+      "hash_power": 0.0,
+      "id": "node23",
+      "peer_group": "group23"
+    },
+    {
+      "hash_power": 0.0,
+      "id": "node24",
+      "peer_group": "group24"
+    },
+    {
+      "hash_power": 0.0,
+      "id": "node25",
+      "peer_group": "group25"
+    },
+    {
+      "hash_power": 0.0,
+      "id": "node26",
+      "peer_group": "group26"
+    },
+    {
+      "hash_power": 0.0,
+      "id": "node27",
+      "peer_group": "group27"
+    },
+    {
+      "hash_power": 0.0,
+      "id": "node28",
+      "peer_group": "group28"
+    },
+    {
+      "hash_power": 0.0,
+      "id": "node29",
+      "peer_group": "group29"
+    }
+  ],
+  "observer": 29,
+  "post_target_ticks": 0,
+  "scenario": "network_honest_validation",
+  "security": {
+    "alpha": 0.1,
+    "audit_ticks": 100,
+    "bootstrap_delay_ticks": 0,
+    "bootstrap_peers": [],
+    "clip": 2.0,
+    "confirmation_increment": 3,
+    "confirmation_ticks": 1000,
+    "cooldown_ticks": 500,
+    "detector": "adaptive",
+    "drift_cap": 2.0,
+    "event_audits": true,
+    "hold_ticks": 500,
+    "k": 3.0,
+    "max_confirmations": 100,
+    "max_payment_hold_ticks": 0,
+    "max_peers": 4,
+    "max_per_group": 1,
+    "min_samples": 5,
+    "min_shares": 64,
+    "mitigate_confirmations": true,
+    "mitigate_peers": false,
+    "mitigate_pool": false,
+    "mitigate_publication": false,
+    "mode": "baseline",
+    "proactive_signals": false,
+    "publication_delay": 20,
+    "reference_file": "results/raw/security_refinement/network/calibration.json",
+    "restrict_bootstrap": false,
+    "stratify_reference": true,
+    "strict_reference": true,
+    "thresholds": {
+      "fork_rate": 0.005,
+      "late_p95": 40.0,
+      "peer_concentration": 0.8,
+      "reorg_depth": 0.5,
+      "reward_concentration": 1.1,
+      "share_deficit": 3.0,
+      "silence_ticks": 500.0,
+      "stale_ratio": 0.25
+    },
+    "window_ticks": 2000
+  },
+  "seed": 42001,
+  "target_height": 0
+}

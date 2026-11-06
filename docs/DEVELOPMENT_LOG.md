@@ -761,3 +761,140 @@ Aucun budget augmenté ni scénario supplémentaire inventé pour combler ces li
 Les empreintes M4 et le préfixe historique de ce journal sont inchangés.
 Aucun commit, push, changement de M4, FastAPI ou frontend. La tâche s'arrête
 à la livraison des benchmarks pour examen personnel du propriétaire.
+
+
+## 2026-11-06 — Reprise PoW, terminal et politique marchande 0.5.0
+
+Décision explicite du propriétaire : laboratoire des quatre attaques PoW uniquement, terminal simple/personnalisé, aucun PoS distribué/web/ML. L’énoncé mentionne PoW/PoS ; cette limitation est déclarée dans PLAN/AGENTS/README/modèle, sans extrapolation. Aucun commit ni push.
+
+Avant modification : Git propre au commit 5376e2c, objet Git de référence M4 9cd1db52813cdb3fc03ac21fc2a3aab6256ce1d3 disponible. `./scripts/preserve-m5.ps1 -Create` a vérifié et archivé 142 fichiers (sources/docs/configs/analyse, exécutable et DLL), et enregistré/vérifié les empreintes de 2914 fichiers M5 historiques. Archive locale ignorée `build/m5-reference`, à conserver : pas une sauvegarde distante. Le script refuse toute divergence ; le moteur refuse les sorties vers m5_30seeds/m5-reference. Le vérificateur M5 ancien s’applique désormais à son arbre archivé, pas aux sources 0.5 modifiées.
+
+Non-régression avant code : `./scripts/test-ucrt64.ps1` a réellement compilé/vérifié GCC UCRT64 et exécuté **44/44 tests réussis, 4,29 s**, démo M1 valide. CMake/CTest 3.31.6-msvc6 et Ninja 1.12.1 de Visual Studio pilotent GCC/OpenSSL UCRT64 comme auparavant ; deux tâches de compilation maximum.
+
+Implémentation : `--interactive`, wizard à flux testable, retours/annulation/validation, génération uniforme de poids 10..100 avec RNG séparé, groupes adverses à ressources non dupliquées, liens manuels ou topologies usuelles, paramètres contextuels, calibration honnête adaptative préalable, exports dans un nouveau run, rejeu/comparaison. Réutilisation du moteur, M1/exo4 inchangés. La hauteur cible concerne un observateur local ; elle ferme la production puis draine la file sous limites, sans publication privée forcée. Les traces pédagogiques affichent parents/blocs privés, réceptions, forks/réorganisations, alertes/actions ; elles ne sont pas des entrées de détection.
+
+Politique : hold_ticks et confirmation_ticks indépendants, seuil encore applicable après suspension, remise à zéro après expiration et renouvellement sur alerte. Audits locaux événementiels optionnels ; signaux précoces facultatifs fork_rate/silence, sans information privée ni future. Acceptations exportées avec confirmations observées/requises et séquence. Les nouveaux scénarios utilisent une annonce d’acceptation P2P, puis la vue publique locale adverse ; les anciens JSON conservent explicitement l’oracle historique public_notice=false. La stratégie générale de rétention/publication n’est pas réoptimisée pour favoriser la défense. Coalition : partage privé instantané supposé ; pas de coût réseau interne. Ce changement d’observation/version interdit de présenter les nouveaux runs comme une réexécution identique de M5.
+
+Validation intermédiaire : une erreur de portée introduite dans un test a été corrigée ; l’assertion de schéma a été passée de 1 à 2 ; une référence temporaire dans minmax a été corrigée suite au warning GCC. Le test historique d’expiration est adapté à la persistance désormais voulue. Suite ensuite à 53/53 (5,71 s), puis 54/54 (7,24 s). Dernière exécution du script après ajout du test d’acceptation effective sous seuil renforcé : **54/54, zéro échec, 9,57 s**, aucune alerte de compilation relevée dans build/final-tests.log. Les dix cas supplémentaires couvrent les deux modes, retour/validation, quatre attaques, coalition/pool, replay/seeds, calibration/insuffisance, arrêt par hauteur, politique, intervention précoce/tardive, faux holds honnêtes, non-acceptation et notification publique/isolement. Les trois autres mitigations passent les contrôles existants. Le terminal a aussi été réellement exercé via stdin : seed42, 4 nœuds/2 mineurs, hauteur8, attaque51 protégée, 13 découvertes, résultat non concluant (branche privée restante), paiement accepté à 2/2 confirmations ; aucun succès artificiel annoncé.
+
+Évaluation séparée : `./scripts/run-validation.ps1` a préparé **1687 jobs sans exécution** sous results/raw/pow_validation_v2/run_2 (1680 évaluations, 7 calibrations). Puissances 0/10/30/49/51/65/85 %, seeds2001..2030, calibration3001, fixe/adaptatif, quatre modes dont honnête protégé. Le protocole prospectif définit appariement, censures, faux positifs et limites ; aucune estimation complète n’est calculée ici.
+
+`./scripts/run-validation.ps1 -Smoke -Run` : **8 processus terminés code0**, distincts de M5, sous results/raw/pow_validation_v2/run_1. Une seule seed2001, détecteur fixe : q30 attaqué/protégé restent non concluants avec branche privée non publiée ; q85 réussit dans les deux modes (paiement accepté tick1698, seuil6), malgré les actions tardives. Les contrôles honnêtes acceptent. Ces observations sont des sanity checks, pas une estimation statistique ni une garantie de défense. Aucune des 720 simulations historiques relancée.
+
+Limites : stratégies M3 simplifiées et une seule stratégie coordonnée par run, modèle de paiement à jeton unique sans signatures, hypothèses Sybil de capture/bootstrap/groupes fiables, PoW témoin borné pouvant épuiser son budget, une référence honnête par profil et métriques partiellement absentes, fenêtre/ticks arrondis, protection sans garantie majoritaire et coût possible d’indisponibilité. L’archive locale doit être sauvegardée hors du PC par le propriétaire s’il le souhaite. Prochaine étape : examiner le protocole puis exécuter séparément la campagne prospective ; aucun résultat M5 n’est remplacé.
+
+Fichiers de cette reprise (état avant cette entrée) :
+
+```text
+ M AGENTS.md
+ M CMakeLists.txt
+ M PLAN.md
+ M README.md
+ M docs/SIMULATION_MODEL.md
+ M src/attacks/attack.hpp
+ M src/attacks/attack_51.cpp
+ M src/attacks/config.cpp
+ M src/attacks/results.cpp
+ M src/attacks/selfish_mining.cpp
+ M src/cli.cpp
+ M src/detection/config_io.cpp
+ M src/detection/detector.cpp
+ M src/detection/detector.hpp
+ M src/metrics/json_exporter.cpp
+ M src/metrics/json_exporter.hpp
+ M src/mitigation/policy.cpp
+ M src/mitigation/policy.hpp
+ M src/sim/config.cpp
+ M src/sim/config.hpp
+ M src/sim/event.hpp
+ M src/sim/security.cpp
+ M src/sim/simulator.cpp
+ M src/sim/simulator.hpp
+ M tests/test_security.cpp
+ M tests/test_simulation.cpp
+?? analysis/POW_VALIDATION_V2_PROTOCOL.md
+?? configs/interactive/attack_51.json
+?? configs/interactive/validation_protocol.json
+?? scripts/preserve-m5.ps1
+?? scripts/run-validation.ps1
+?? src/terminal/interactive.cpp
+?? src/terminal/interactive.hpp
+?? tests/test_terminal.cpp
+```
+
+Verification finale : scripts/preserve-m5.ps1 confirme 142 fichiers archives et 2914 fichiers historiques identiques, y compris rapports/configurations M5 et exo4.cpp. Le verificateur original execute depuis build/m5-reference/analysis/benchmark.py verify retourne Frozen M4 unchanged ; la demo du binaire archive retourne chain_valid=true. Aucun commit/push.
+
+
+## 2026-11-06 — Terminal 0.5.1 : lisibilité, ressources et quatre attaques
+
+Travail conservé depuis la reprise 0.5.0, sans redémarrage de l’implémentation ni commit/push. Avant modification : 54/54 tests réellement réussis (7,75 s) et référence M5 vérifiée (142 fichiers archivés, 2914 fichiers historiques). Aucun fichier M5 ou exo4.cpp modifié.
+
+Menus sectionnés, aide ?/aide (défaut et bornes), retour/annulation conservés. Puissance adverse simple explicite 0..100 pour 51 %/selfish/withholding, complément honnête normalisé et aucune double comptabilisation ; paramètres de pool/identités Sybil contextuels. Ressources personnalisées conservées. Récapitulatif avec modification d’une question choisie, réseau/latences, détection, seed et limites. Le choix adaptatif reste la valeur proposée des paramètres avancés. Un réseau manuel partitionné n’est pas présenté comme un anneau connecté.
+
+Affichage synthétique par défaut, détaillé optionnel. Nouveau renderer en lecture seule, aucune mutation du moteur/RNG, égalité JSON testée entre affichages. Les réceptions/envois/retransmissions sont conservés dans l’export ; les alertes/actions répétées sont regroupées seulement à l’écran. Traces publiques du paiement accepté/renversé/restauré, sans changement de stratégie.
+
+Diagnostic exact de l’ancien run utilisateur results/raw/interactive/run_2 : puissance 34/498=6,827309 %, 202 alertes (141 late_p95, 31 reorg_depth, 30 silence_ticks), 31 actions. Détecteur fixe sans calibration. Délais moyens46,1724/max91 > seuil40 via l’anneau honnête, adversaire jamais publié. Les silences finaux viennent des timers inactifs après arrêt (production2349, livraison2407, ancien dernier tick5312). Annulation désormais sans avance d’horloge ; phases production/drain/final_observation exportées, observations finales sans action. Aucun seuil abaissé ni aucune mitigation M4 réoptimisée.
+
+Rejeu du JSON exact : mêmes blocs et délais, acceptation334 conservée, fin2407, 178 alertes dont7 finales, 30 actions. L’audit périodique déjà planifié après fermeture n’est plus exécuté. Avec post_target_ticks=2000 : production normale supplémentaire, 36 découvertes/hauteur31, deux blocs privés non publiés et résultat toujours non concluant. La fenêtre post-cible est prédéfinie et bornée ; pas de prolongation jusqu’au succès, publication forcée ou succès défensif déduit d’une non-acceptation. Les motifs d’arrêt et limites sont distincts de l’issue ; une réussite déjà observée n’est pas effacée par un plafond atteint.
+
+Tests par lots : menu54/54 (6,01 s), arrêt54/54 (6,65 s). Le premier test de censure exigeait à tort une issue non concluante alors que l’objectif pouvait déjà être observé ; correction du cas pour tester une tentative non résolue (confirmations10000), sans changer les stratégies. Dernière exécution réelle `./scripts/test-ucrt64.ps1` : **60/60 tests réussis, zéro échec, 16,34 s**. Deux tâches de compilation maximum, GCC/OpenSSL UCRT64, CMake/Ninja/CTest existants. Les six nouveaux cas couvrent pourcentages, aide/récapitulatif/correction, détection choisie, invariance d’affichage, fenêtre/censure/annulation et les quatre profils simples/personnalisés, avec entrées invalides par attaque. Les autres mitigations passent la non-régression.
+
+`./scripts/check-terminal.ps1` a réellement exécuté 14 sessions CLI code0 (8 simples sans/avec défense, 4 personnalisées, 2 contrôles majoritaires), seed42, entrées/stdout/manifeste SHA-256 sous results/raw/terminal_review/checks_1. Résultats simples : 51 % à40 réussit dans les deux modes (acceptation419, publication425, renversement/alerte431) ; selfish part60,42→55,32 %, toujours au-dessus de40, avec247 reports dont118 contenus honnêtes ; pool47 solutions retenues et récompense44 inchangées, payout adverse16,3729→6,7622,335 shares adverses non créditées ; Sybil isolement réussi sans défense/plafond300 atteint, échoué avec défense après2 reconnexions (510) puis adoption511. Le cas personnalisé Sybil capture=false échoue sans aucune action, car une liaison honnête demeure : ne pas attribuer cet échec à la défense.
+
+Deux autres sessions CLI : 30 nœuds/10 mineurs/15/40 %/+2000 restent non concluants (44 découvertes,16 blocs privés non publiés,399 alertes/84 actions,144 lignes terminal) ; une session adaptative simple5/2/8/40 % exécute la calibration honnête préalable puis l’attaque (23 alertes/10 actions, double dépense réussie). Aucune promesse d’efficacité ni estimation statistique. Les conditions d’arrêt dépendent de la trajectoire ; Sybil n’a pas le même horizon réalisé dans ses deux modes. Une campagne à budget commun reste nécessaire pour des conclusions statistiques.
+
+Rapport complet : analysis/TERMINAL_REVIEW_051.md. Documentation README, modèle et plan mis à jour. Créés dans ce lot : src/terminal/display.hpp/.cpp, scripts/check-terminal.ps1, analysis/TERMINAL_REVIEW_051.md. Modifiés dans ce lot : CMakeLists.txt ; src/terminal/interactive.hpp/.cpp ; src/sim/config.hpp/.cpp, event.hpp, event_queue.hpp, simulator.hpp/.cpp, security.cpp ; src/metrics/json_exporter.cpp, security_export.cpp ; tests/test_terminal.cpp ; PLAN.md, README.md, docs/SIMULATION_MODEL.md et ce journal. Les autres modifications déjà présentes du lot précédent sont conservées.
+
+Limites : seuils fixes peu adaptés à certains diamètres/cadences, alertes locales répétées et coût honnête des sanctions, stratégies M3 simplifiées, bootstrap/groupes Sybil supposés fiables, une seed par essai. Aucun test isolé ne démontre une efficacité générale, et aucune garantie contre une majorité de hash power n’est donnée. Aucun M5 relancé. L’empreinte du run utilisateur original reste inchangée.
+
+
+## 2026-11-06 — M4 0.6.0 : raffinement scientifique par lots
+
+Hypothèses/critères/coûts/tests consignés avant implémentation dans docs/SECURITY_REFINEMENT_PLAN.md. Périmètre : M4 seulement, instrumentation publique/intégration événementielle nécessaire, aucune modification des stratégies M3. L’empreinte initiale de tous les fichiers M1/M3, exo4.cpp et configurations préexistantes est conservée dans build/security_before_hashes.json ; vérification finale : zéro divergence. Les modifications déjà non commitées des travaux antérieurs sont conservées. Aucun commit/push.
+
+Avant : scripts/preserve-m5.ps1 vérifié et 60/60 CTest réellement réussis (21,92 s). Lot A : 61/61 (23,26 s). Lot B : 62/62 (23,38 s). Lot C : 65/65 (37,07 s), puis dernière suite après précision du compteur causal : **65/65, zéro échec, 27,45 s**, aucun warning/erreur de compilation relevé. Commande : ./scripts/test-ucrt64.ps1, GCC/OpenSSL UCRT64, CMake/Ninja/CTest existants, deux tâches maximum.
+
+A : séparation suspension/confirmations déjà présente, conservée et testée ; max_payment_hold_ticks optionnel (0=historique), confirmations seules possibles avec hold0. Journal marchand public avant évaluation M3, avec tête/présence/confirmations/suspension/éligibilité, séquence et ordre de trace. Sans acceptation, les compteurs avant acceptation sont null et les actions pendant la non-acceptation restent comptées. Base-ready sur trajectoire réalisée n’est pas un contre-factuel. Signal précoce190, occasion206, acceptation377 sous seuil renforcé. Cas tardif85% : acceptation74, action85, double dépense réussie. Stress honnête (silence1/cooldown1 volontairement artificiels) : refus sans plafond, acceptation512 avec plafond50, contrôle206. Ce gain de disponibilité coûte306 ticks et ne prouve pas une amélioration de sûreté. Pas de modification de l’attaque ni de seuils de benchmark pour fabriquer un succès.
+
+B : références honnêtes liées au profil réseau initial, strict_reference et stratify_reference optionnels, anciennes références non liées compatibles sauf demande stricte. Nouveaux fichiers de référence schéma2 et contrôle de source honnête. Profil sans seed/activation défensive, avec ressources nominales, topologie/délais/cadence/fenêtres et mécanismes publics ; ce contrôle est hors ligne, pas une estimation de puissance adverse cachée. Strates publiques nœud/composant/métrique ; EWMA/seuil fixe/clipping inchangés. Train41001 et validation42001 indépendants sur30 nœuds : alertes826→265 (retards544→14), mais227 réorganisations restent alertées et336 évaluations sont ignorées faute de strate ;227 cellules de référence. À couverture commune,822 alertes fixes contre265 stratifiées ;4 alertes fixes étaient hors couverture. Les deux modes ont les mêmes blocs et les mêmes trois familles de faux positifs sur ce run honnête. Interventions honnêtes258→227, paiement119 dans les deux modes : bruit réduit, aucune amélioration de disponibilité démontrée ici ni taux de faux positifs général.
+
+C : coûts de probation par vrai émetteur/producteur, étiquettes appliquées uniquement après simulation ; crédits/payouts de pool par rôle, perte par contrôle apparié ; accès bootstrap public restreint/retardé en option, sans sélection par label secret. Profils M4 existants seed42 : selfish55,22→44,83% avec141 reports,94 émetteurs honnêtes et46 contenus honnêtes (catégories recouvrantes),4600 ticks ajoutés à ces contenus. Pool99 unités honnêtes vs48 attaquées/protégées, donc51 perdues, distinctes des52 solutions retenues ; payout adverse17,8966→6,9579,371 shares adverses non créditées et0 honnête dans ce cas. Le test sensible honnête (.01/min_shares1, pas une recommandation) observe767 shares honnêtes sanctionnées. Sybil : demande100/adoption101 si candidat accessible, adoption351 si connexion retardée250 ; cinq demandes et aucune récupération si seuls relais contrôlés accessibles. Échec de mitigation conservé, pas réparation omnisciente ni délai nul imputé.
+
+Cinq exemples JSON neufs sous configs/security_refinement/ réellement exécutés, tous code0, sorties results/raw/security_refinement/ : marchand plafonné, calibration/validation réseau, bootstrap restreint et retardé. Les résultats des cas de développement sont sous build/ucrt64/security-refinement/. Les coûts CPU/RSS propres au collecteur ne sont pas profilés ; seuls les records logiques/messages/ticks sont mesurés. Une référence de profil ne résout pas les changements de conditions après calibration ; abstentions et strates insuffisantes doivent rester visibles.
+
+Rapport : analysis/M4_REFINEMENT_REPORT.md. Proposition indépendante non exécutée : analysis/M4_INDEPENDENT_BENCHMARK_PROPOSAL.md,16 profils, puissances/topologies/accès distincts, ensembles disjoints et quatre/six conditions,4680 runs finaux nominaux et6432 avec entraînement/validation/pilotes. Validation du propriétaire et estimation disque/temps obligatoires avant la grande campagne. Le merge multi-seeds des moments nécessite encore une implémentation/test dédiée avant de prétendre à une calibration multi-seeds. Aucune des720 simulations M5 relancée.
+
+Créés : src/metrics/security_study.hpp/.cpp ; src/detection/profile.hpp/.cpp ; tests/test_security_refinement.cpp, test_network_reference.cpp, test_defense_costs.cpp ; cinq configs/security_refinement/*.json ; docs/SECURITY_REFINEMENT_PLAN.md ; analysis/M4_REFINEMENT_REPORT.md et M4_INDEPENDENT_BENCHMARK_PROPOSAL.md. Modifiés dans ce lot : CMakeLists.txt ; src/detection/detector.hpp/.cpp et config_io.cpp ; src/mitigation/policy.hpp/.cpp ; src/sim/simulator.hpp/.cpp, security.cpp, config.cpp, event.hpp ; src/metrics/json_exporter.cpp, security_export.cpp ; README.md, PLAN.md, docs/SIMULATION_MODEL.md et ce journal. Les autres fichiers déjà modifiés des lots précédents n’ont pas été réécrits.
+
+
+## 2026-11-06 — Simplification finale du terminal uniquement
+
+Modifications limitées à la couche terminal, ses tests/saisies de régression, CMake et documentation. Empreintes avant/après : src/core, sim, attacks, detection, mitigation, metrics, toutes configurations et tous fichiers analysis existants, exo4.cpp : aucune divergence (build/simple_ui_preservation.json). Aucune nouvelle fonctionnalité scientifique, aucun seuil ou benchmark modifié, aucune campagne lancée, aucun commit/push.
+
+Mode simple réduit aux six paramètres demandés (sans puissance pour Sybil), récapitulatif court et confirmation/correction. Plus de réglages de pool/identités/réseau/fenêtre/détails en simple ; réglages personnalisés conservés. Les valeurs automatiques utilisent le générateur et les paramètres déjà existants. L’exécution simple, calibration incluse, n’affiche que Simulation en cours... ; exports JSON complets préservés.
+
+Résultats : issue du moteur inchangée, explication courte, défense NON EVALUABLE avant comparaison, trois indicateurs au maximum par attaque. Critères de défense explicités dans docs/TERMINAL_SIMPLE.md et l’écran comparatif. Atténuation économique/selfish n’est jamais présentée comme échec de l’attaque ; non-acceptation et tentative non concluante n’impliquent pas protection. La perte de pool exige une référence honnête réellement exécutée.
+
+Menu persistant : Comparer exécute deux nouveaux runs appariés (même seed/configuration, mode de défense seul changé), partage la référence adaptative exacte et retourne au menu applicatif sans retour à PowerShell. Les tests exécutent ce parcours pour les quatre attaques et pour l’adaptatif ; vérifient les configurations exportées et l’absence de ticks/séquences/nœuds/alertes internes. Test réel de l’exécutable via stdin également réussi (build/simple-app-demo.log) : attaque51 à40 % réussie dans les deux variantes, défense NON, aucune victoire inventée.
+
+Vérifications : suite intermédiaire65/65 réussie (22,77 s), finale ./scripts/test-ucrt64.ps1 : 67/67 réussis, zéro échec,30,83 s, CMake/Ninja/GCC UCRT64, deux tâches maximum. Pas de warning de compilation relevé. Nouveaux tests terminal_simple_app et terminal_simple_verdict. Les saisies du script check-terminal.ps1 sont adaptées, sans changer ses paramètres scientifiques ni relancer ses scénarios.
+
+Créés : src/terminal/simple.hpp/.cpp et docs/TERMINAL_SIMPLE.md. Modifiés dans ce lot : src/terminal/interactive.hpp/.cpp, tests/test_terminal.cpp, CMakeLists.txt, scripts/check-terminal.ps1, README.md et ce journal. Le mode personnalisé et la CLI historique restent disponibles.
+
+
+## 2026-11-06 — Renforcement final M4, politique optionnelle hardened_m4_v1
+
+Protocole prospectif : docs/FINAL_DEFENSE_PROTOCOL.md ; résultats détaillés et inventaire : docs/FINAL_DEFENSE_RESULTS.md. Ajout C++ effectif de confirmations préventives, épisodes de hold non renouvelés inutilement, niveaux information/persistance/criticité, probation par producteur public avec nouveauté requise, séquestre temporaire de shares et restitution, diversité préventive du client public désigné avec redondance et décompte de l'éclipse initiale. Ne pas reconfigurer les voisins adverses ; ne pas réagir sur les confirmations après l'acceptation publique de l'unique paiement du modèle. Paramètres nouveaux validés et sérialisés ; anciens JSON et terminal inchangés, activation explicite hardened_security=true.
+
+Avant : 67/67 CTest,30,92 s via scripts/test-ucrt64.ps1. Deux rebuilds bloqués à l'édition de liens de l'ancien blockchain_sim.exe (Permission denied) ; contournement local par CMAKE_RUNTIME_OUTPUT_DIRECTORY=build/ucrt64/final-bin, mêmes preset/outils/périmètre. Dernier build réel avec deux jobs et CTest : 72/72,37,43 s, aucun échec, pas de warning/erreur dans le dernier build. Nouveau binaire --demo : chain_valid=true. Tests ciblés initiaux5/5,8,72 s puis non-régression après corrections de comptage des connexions entrantes, des actions post-acceptation et du coût de diversification. Commandes exactes et logs dans le rapport.
+
+Seeds42/43, huit paires attaquées et huit paires honnêtes ; comparaison JSON ne diffère que par security.mode dans chaque paire attaquée, mêmes découvertes, observation fixe5000/40000/3000ticks selon profil. Aucune modification M3 ni résultat sélectionné pour embellir les chiffres. 51%85% : deux doubles dépenses sur deux encore observées ; coût honnête127/102ticks. Selfish40% : part47,16/32,93 ->28,29/10,32%, aucun contenu honnête directement retardé mais hauteur totale réduite24/12blocs, issues protégées inconclusives à horizon fini. Pool : payout adverse immédiatement distribuable42,6241/45,5223 ->8,2968/9,1136 ;1047/1131crédits restituables en séquestre, aucune sanction honnête sur les références ; pertes de pool93/71inchangées. Sybil : isolement initial censuré3000 ->lien indépendantt0, premierbloc48/304 ;2liensajoutés et96/100messages honnêtes supplémentaires (+50%). Annuaire uniquement contrôlé : récupération impossible conservée. Pas de promesse d'efficacité générale.
+
+SHA-256 des108fichiers préexistants protégés : zéro divergence ; archive M5 :142fichiers et2914sorties historiques vérifiés. Exo4, core, stratégies d'attaque, hasard, fork choice, terminal et anciens configs/analysis préservés. Aucun commit/push et aucune campagne M5 relancée. Les modifications des tâches antérieures restent non commitées.
+
+
+## 2026-11-06 — Activation finale dans le terminal simple
+
+Périmètre : src/terminal/interactive.cpp, simple.hpp/.cpp et tests/test_terminal.cpp uniquement pour le comportement ; mode personnalisé et générateur commun inchangés. Le formulaire simple active hardened_security pour fixe/adaptatif et le désactive sans défense. Comparer en simple force false/true sur les deux variantes, même après une sélection initiale sans défense. Les références honnêtes adaptatives sont calculées séparément car les extracteurs v2/v3 ont des profils incompatibles ; aucune référence historique n'est réétiquetée. Le chemin personnalisé conserve ses règles antérieures.
+
+Build réel : cmake --build --preset ucrt64 --parallel 2 (sortie locale final-bin déjà configurée). CTest ciblé : ctest --preset ucrt64 -R '^terminal_(simple|custom|simple_app|adaptive)$' --output-on-failure : 4/4 réussis, 10,42 s. Tests couvrant les quatre attaques depuis Comparer et l'adaptatif, activation fixe/adaptative, désactivation sans défense et conservation du personnalisé. Exécution supplémentaire du vrai build/ucrt64/final-bin/blockchain_sim.exe --interactive par stdin, initialement sans défense puis Comparer dans l'application : exports false/true et seed42/42 vérifiés. Transcript : build/simple-hardened-demo/transcript.txt. Aucun benchmark complet, commit ou push.
